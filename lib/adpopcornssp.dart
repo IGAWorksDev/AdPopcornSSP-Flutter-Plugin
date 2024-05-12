@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 
@@ -222,8 +221,6 @@ class AdPopcornSSP {
         if (rewardVideoAdCompletedListener != null){
             rewardVideoAdCompletedListener!(placementId, adNetworkNo, completed);
         }
-      } else {
-        throw new MissingPluginException("Method not implemented, $method");
       }
     }
     return Future<dynamic>.value(null);
