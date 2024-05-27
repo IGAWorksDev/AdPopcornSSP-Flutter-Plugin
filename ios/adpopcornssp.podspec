@@ -4,19 +4,19 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'adpopcornssp'
-  s.version          = '1.0.0'
+  s.version          = '1.0.2'
   s.summary          = 'AdPopcornSSP plugin project.'
   s.description      = <<-DESC
 A new Flutter plugin project.
                        DESC
   s.homepage         = 'https://adpopcorn.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'mick.kim@adpopcorn.com' }
+  s.author           = { 'AdPopcorn' => 'mick.kim@adpopcorn.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'AdPopcornSSP', '2.6.5'
+  s.dependency 'AdPopcornSSP', '2.7.0'
   s.platform = :ios, '11.0'
 
   # Flutter.framework does not contain a i386 slice.

@@ -1,21 +1,19 @@
 name: adpopcornssp
 description: "AdPopcornSSP Flutter plugin project."
-version: 1.0.0
+version: 1.0.2
 homepage: https://adpopcorn.com
 
 environment:
-  sdk: '>=3.3.3 <4.0.0'
-  flutter: '>=3.3.0'
+  sdk: '>=2.19.0 <4.0.0'
+  flutter: '>=2.5.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -36,9 +34,9 @@ flutter:
     platforms:
       android:
         package: com.adpopcorn.adpopcornssp
-        pluginClass: AdpopcornsspPlugin
+        pluginClass: AdPopcornSSPPlugin
       ios:
-        pluginClass: AdpopcornsspPlugin
+        pluginClass: AdPopcornSSPPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

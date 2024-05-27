@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:7.2.0'
     }
 }
 
@@ -22,11 +22,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace 'com.adpopcorn.adpopcornssp'
-    }
-
-    compileSdk 34
+    compileSdkVersion 31
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -34,10 +30,10 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 16
     }
 
     dependencies {
-        implementation 'com.igaworks.ssp:IgawAdPopcornSSP:3.4.1'
+        implementation 'com.igaworks.ssp:IgawAdPopcornSSP:3.5.0'
     }
 }

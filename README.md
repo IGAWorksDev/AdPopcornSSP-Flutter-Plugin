@@ -4,8 +4,8 @@ AdPopcornSSP plugin project.
 
 ## Current AdPopcornSSP SDK version
 
-- Android :  3.4.1
-- iOS : 2.6.5
+- Android :  3.5.0
+- iOS : 2.7.0
 
 ## Install the Plugin
 
@@ -13,7 +13,7 @@ Add dependencies on pubspec.yaml
 
 ```
 dependencies:
-  adpopcornssp: ^1.0.0
+  adpopcornssp: ^1.0.2
 ```
 
 ## Integration Guide
