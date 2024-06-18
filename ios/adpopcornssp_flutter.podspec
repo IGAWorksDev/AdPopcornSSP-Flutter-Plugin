@@ -1,10 +1,10 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint adpopcornssp.podspec` to validate before publishing.
+# Run `pod lib lint adpopcornssp_flutter.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'adpopcornssp'
-  s.version          = '1.0.2'
+  s.name             = 'adpopcornssp_flutter'
+  s.version          = '1.0.0'
   s.summary          = 'AdPopcornSSP plugin project.'
   s.description      = <<-DESC
 A new Flutter plugin project.

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
-import 'package:adpopcornssp/adpopcornssp.dart';
+import 'package:adpopcornssp_flutter/adpopcornssp_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -145,7 +145,7 @@ class _MyAppState extends State<MyApp> {
       {'appKey':'663451319', 'placementId':'NATIVE_TEMPLATE'};
       return Container(
         width: double.maxFinite,
-        height:280,
+        height:200,
         child: AndroidView(
           viewType: viewType,
           layoutDirection: TextDirection.ltr,

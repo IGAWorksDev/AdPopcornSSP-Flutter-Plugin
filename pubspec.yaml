@@ -1,6 +1,6 @@
-name: adpopcornssp
+name: adpopcornssp_flutter
 description: "AdPopcornSSP Flutter plugin project."
-version: 1.0.2
+version: 1.0.0
 homepage: https://adpopcorn.com
 
 environment:
@@ -33,7 +33,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.adpopcorn.adpopcornssp
+        package: com.adpopcorn.adpopcornssp_flutter
         pluginClass: AdPopcornSSPPlugin
       ios:
         pluginClass: AdPopcornSSPPlugin

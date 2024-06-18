@@ -1,4 +1,7 @@
 #import <Flutter/Flutter.h>
+#import <AdPopcornSSP/AdPopcornSSPSDK.h>
+#import "AdPopcornSSPFLBannerView.h"
+#import "AdPopcornSSPFLNativeView.h"
 
 @interface AdPopcornSSPPlugin : NSObject<FlutterPlugin>
 @property(nonatomic, strong) FlutterMethodChannel *channel;

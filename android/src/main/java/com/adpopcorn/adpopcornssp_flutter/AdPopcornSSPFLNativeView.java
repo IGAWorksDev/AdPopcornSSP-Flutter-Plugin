@@ -1,4 +1,4 @@
-package com.adpopcorn.adpopcornssp;
+package com.adpopcorn.adpopcornssp_flutter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,16 +22,26 @@ public class AdPopcornSSPFLNativeView implements PlatformView, IReactNativeAdEve
     private AdPopcornSSPReactNativeAd nativeView;
     private MethodChannel channel;
     private String placementId;
+    private int width = 0;
+    private int height = 0;
     AdPopcornSSPFLNativeView(Activity activity, @NonNull Context context, int id, @Nullable Map<String, Object> creationParams, BinaryMessenger binaryMessenger) {
         if(creationParams != null)
         {
             placementId = (String)creationParams.get("placementId");
+            if(creationParams.containsKey("width"))
+                width = (int)creationParams.get("width");
+            if(creationParams.containsKey("height"))
+                height = (int)creationParams.get("height");
         }
         if(placementId == null)
             return;
 
         channel = new MethodChannel(binaryMessenger, "adpopcornssp/" + placementId);
         nativeView = new AdPopcornSSPReactNativeAd(activity);
+        if(width > 0)
+            nativeView.setReactNativeWidth(width);
+        if(height > 0)
+            nativeView.setReactNativeHeight(height);
         nativeView.setReactNativeAdEventCallbackListener(this);
         nativeView.setPlacementId(placementId);
         nativeView.loadAd();

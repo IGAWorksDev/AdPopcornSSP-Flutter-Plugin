@@ -1,8 +1,5 @@
 #import <Foundation/Foundation.h>
 #import "AdPopcornSSPPlugin.h"
-#import <AdPopcornSSP/AdPopcornSSPSDK.h>
-#import "AdPopcornSSPFLBannerView.h"
-#import "AdPopcornSSPFLNativeView.h"
 
 @interface AdPopcornSSPPlugin() <APSSPSDKInitializeDelegate, APSSPInterstitialAdDelegate,
     APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate>

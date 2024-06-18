@@ -1,4 +1,4 @@
-package com.adpopcorn.adpopcornssp_example;
+package com.adpopcorn.adpopcornssp_flutter_example;
 
 import io.flutter.embedding.android.FlutterActivity;
 

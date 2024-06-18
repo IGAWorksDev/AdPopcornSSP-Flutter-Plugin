@@ -1,23 +1,20 @@
-package com.adpopcorn.adpopcornssp;
+package com.adpopcorn.adpopcornssp_flutter;
 
 import android.app.Activity;
 import android.content.Context;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import java.util.Map;
+import androidx.annotation.NonNull;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
+import java.util.Map;
 
-public class AdPopcornSSPFLBannerViewFactory extends PlatformViewFactory {
-    private BinaryMessenger binaryMessenger;
+public class AdPopcornSSPFLNativeViewFactory extends PlatformViewFactory {
+    BinaryMessenger binaryMessenger;
     private Activity activity;
-
-    AdPopcornSSPFLBannerViewFactory(Activity activity, BinaryMessenger binaryMessenger) {
+    AdPopcornSSPFLNativeViewFactory(Activity activity, BinaryMessenger binaryMessenger) {
         super(StandardMessageCodec.INSTANCE);
         this.activity = activity;
         this.binaryMessenger = binaryMessenger;
@@ -27,6 +24,6 @@ public class AdPopcornSSPFLBannerViewFactory extends PlatformViewFactory {
     @Override
     public PlatformView create(@NonNull Context context, int id, @Nullable Object args) {
         final Map<String, Object> creationParams = (Map<String, Object>) args;
-        return new AdPopcornSSPFLBannerView(activity, context, id, creationParams, this.binaryMessenger);
+        return new AdPopcornSSPFLNativeView(activity, context, id, creationParams, this.binaryMessenger);
     }
 }

@@ -1,4 +1,4 @@
-# adpopcornssp
+# adpopcornssp_flutter
 
 AdPopcornSSP plugin project.
 
@@ -13,7 +13,7 @@ Add dependencies on pubspec.yaml
 
 ```
 dependencies:
-  adpopcornssp: ^1.0.2
+  adpopcornssp_flutter: ^1.0.0
 ```
 
 ## Integration Guide

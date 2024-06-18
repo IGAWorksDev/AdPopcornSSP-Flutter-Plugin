@@ -1,6 +1,6 @@
-# adpopcornssp_example
+# adpopcornssp_flutter_example
 
-Demonstrates how to use the adpopcornssp plugin.
+Demonstrates how to use the adpopcornssp_flutter plugin.
 
 ## Getting Started
 

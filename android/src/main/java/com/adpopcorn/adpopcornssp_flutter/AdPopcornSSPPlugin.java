@@ -1,4 +1,4 @@
-package com.adpopcorn.adpopcornssp;
+package com.adpopcorn.adpopcornssp_flutter;
 
 import android.content.Context;
 import android.text.TextUtils;
