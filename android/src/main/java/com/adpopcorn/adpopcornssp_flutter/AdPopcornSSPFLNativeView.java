@@ -2,7 +2,7 @@ package com.adpopcorn.adpopcornssp_flutter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
+import android.util.TypedValue;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,9 +29,9 @@ public class AdPopcornSSPFLNativeView implements PlatformView, IReactNativeAdEve
         {
             placementId = (String)creationParams.get("placementId");
             if(creationParams.containsKey("width"))
-                width = (int)creationParams.get("width");
+                width = DpToPxInt(context, (int)creationParams.get("width"));
             if(creationParams.containsKey("height"))
-                height = (int)creationParams.get("height");
+                height = DpToPxInt(context, (int)creationParams.get("height"));
         }
         if(placementId == null)
             return;
@@ -55,8 +55,7 @@ public class AdPopcornSSPFLNativeView implements PlatformView, IReactNativeAdEve
 
     @Override
     public void dispose() {
-        if(channel != null)
-        {
+        if(channel != null) {
             channel.setMethodCallHandler(null);
             channel = null;
         }
@@ -94,5 +93,9 @@ public class AdPopcornSSPFLNativeView implements PlatformView, IReactNativeAdEve
         Map<String, Object> arguments = new HashMap<>();
         for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
         return arguments;
+    }
+
+    private int DpToPxInt(Context context, int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 }
