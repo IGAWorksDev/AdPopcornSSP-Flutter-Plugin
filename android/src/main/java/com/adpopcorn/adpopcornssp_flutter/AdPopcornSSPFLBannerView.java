@@ -57,8 +57,7 @@ public class AdPopcornSSPFLBannerView implements PlatformView, IBannerEventCallb
 
     @Override
     public void dispose() {
-        if(channel != null)
-        {
+        if(channel != null) {
             channel.setMethodCallHandler(null);
             channel = null;
         }
@@ -87,7 +86,9 @@ public class AdPopcornSSPFLBannerView implements PlatformView, IBannerEventCallb
 
     private Map<String, Object> argumentsMap(Object... args) {
         Map<String, Object> arguments = new HashMap<>();
-        for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
+        try{
+            for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
+        }catch (Exception e){}
         return arguments;
     }
 }

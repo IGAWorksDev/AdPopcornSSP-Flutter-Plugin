@@ -91,7 +91,9 @@ public class AdPopcornSSPFLNativeView implements PlatformView, IReactNativeAdEve
 
     private Map<String, Object> argumentsMap(Object... args) {
         Map<String, Object> arguments = new HashMap<>();
-        for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
+        try{
+            for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
+        }catch (Exception e){}
         return arguments;
     }
 

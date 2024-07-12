@@ -13,9 +13,9 @@ Add dependencies on pubspec.yaml
 
 ```
 dependencies:
-  adpopcornssp_flutter: ^1.0.1
+  adpopcornssp_flutter: ^1.0.2
 ```
 
 ## Integration Guide
 
-To See More Information please see AdPopcornSSP [Integration Guide](https://adpopcorn.notion.site/SSP-Flutter-e65cdb30d5bb429fbd8841f08297d4a3).
+To See More Information please see AdPopcornSSP [Integration Guide](https://adpopcornssp.gitbook.io/ssp-sdk/flutter).

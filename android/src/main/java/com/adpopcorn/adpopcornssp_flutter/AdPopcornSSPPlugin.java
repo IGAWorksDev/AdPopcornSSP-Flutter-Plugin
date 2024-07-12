@@ -89,27 +89,29 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if (call.method.equals("init")) {
-      callInit(call, result);
-    } else if (call.method.equals("setUserId")) {
-      callUserId(call, result);
-    } else if (call.method.equals("setLogEnable")) {
-      callSetLogEnable(call, result);
-    } else if (call.method.equals("loadInterstitial")) {
-      callLoadInterstitial(call, result);
-    } else if (call.method.equals("showInterstitial")) {
-      callShowInterstitial(call, result);
-    } else if (call.method.equals("loadInterstitialVideo")) {
-      callLoadInterstitialVideo(call, result);
-    } else if (call.method.equals("showInterstitialVideo")) {
-      callShowInterstitialVideo(call, result);
-    } else if (call.method.equals("loadRewardVideo")) {
-      callLoadRewardVideo(call, result);
-    } else if (call.method.equals("showRewardVideo")) {
-      callShowRewardVideo(call, result);
-    } else {
-      result.notImplemented();
-    }
+    try {
+      if (call.method.equals("init")) {
+        callInit(call, result);
+      } else if (call.method.equals("setUserId")) {
+        callUserId(call, result);
+      } else if (call.method.equals("setLogEnable")) {
+        callSetLogEnable(call, result);
+      } else if (call.method.equals("loadInterstitial")) {
+        callLoadInterstitial(call, result);
+      } else if (call.method.equals("showInterstitial")) {
+        callShowInterstitial(call, result);
+      } else if (call.method.equals("loadInterstitialVideo")) {
+        callLoadInterstitialVideo(call, result);
+      } else if (call.method.equals("showInterstitialVideo")) {
+        callShowInterstitialVideo(call, result);
+      } else if (call.method.equals("loadRewardVideo")) {
+        callLoadRewardVideo(call, result);
+      } else if (call.method.equals("showRewardVideo")) {
+        callShowRewardVideo(call, result);
+      } else {
+        result.notImplemented();
+      }
+    }catch (Exception e){}
   }
 
   private void callInit(@NonNull MethodCall call, @NonNull Result result)
@@ -117,7 +119,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
     AdPopcornSSP.init(context, new SdkInitListener() {
       @Override
       public void onInitializationFinished() {
-        channel.invokeMethod("AdPopcornSSPSDKDidInitialize", argumentsMap());
+        try {
+          if (channel != null)
+            channel.invokeMethod("AdPopcornSSPSDKDidInitialize", argumentsMap());
+        }catch (Exception e){}
       }
     });
   }
@@ -140,210 +145,246 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
 
   private void callLoadInterstitial(@NonNull MethodCall call, @NonNull Result result)
   {
-    final String placementId = call.argument("placementId");
-    AdPopcornSSPInterstitialAd interstitialAd;
-    if(interstitialAdMap.containsKey(placementId))
-    {
-      interstitialAd = interstitialAdMap.get(placementId);
-    }
-    else
-    {
-      interstitialAd = new AdPopcornSSPInterstitialAd(context);
-      interstitialAdMap.put(placementId, interstitialAd);
-    }
-    interstitialAd.setPlacementId(placementId);
-    interstitialAd.setInterstitialEventCallbackListener(new IInterstitialEventCallbackListener() {
-      @Override
-      public void OnInterstitialLoaded() {
-        channel.invokeMethod("APSSPInterstitialAdLoadSuccess", argumentsMap("placementId", placementId));
+    try {
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPInterstitialAd interstitialAd;
+      if (interstitialAdMap.containsKey(placementId)) {
+        interstitialAd = interstitialAdMap.get(placementId);
+      } else {
+        interstitialAd = new AdPopcornSSPInterstitialAd(context);
+        interstitialAdMap.put(placementId, interstitialAd);
       }
+      interstitialAd.setPlacementId(placementId);
+      interstitialAd.setInterstitialEventCallbackListener(new IInterstitialEventCallbackListener() {
+        @Override
+        public void OnInterstitialLoaded() {
+          if (channel != null)
+            channel.invokeMethod("APSSPInterstitialAdLoadSuccess", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialReceiveFailed(SSPErrorCode sspErrorCode) {
-        channel.invokeMethod("APSSPInterstitialAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
-      }
+        @Override
+        public void OnInterstitialReceiveFailed(SSPErrorCode sspErrorCode) {
+          if (channel != null)
+            channel.invokeMethod("APSSPInterstitialAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+        }
 
-      @Override
-      public void OnInterstitialOpened() {
-        channel.invokeMethod("APSSPInterstitialAdShowSuccess", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnInterstitialOpened() {
+          if (channel != null)
+            channel.invokeMethod("APSSPInterstitialAdShowSuccess", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialOpenFailed(SSPErrorCode sspErrorCode) {
-        channel.invokeMethod("APSSPInterstitialAdShowFail", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnInterstitialOpenFailed(SSPErrorCode sspErrorCode) {
+          if (channel != null)
+            channel.invokeMethod("APSSPInterstitialAdShowFail", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialClosed(int i) {
-        channel.invokeMethod("APSSPInterstitialAdClosed", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnInterstitialClosed(int i) {
+          if (channel != null)
+            channel.invokeMethod("APSSPInterstitialAdClosed", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialClicked() {
-        channel.invokeMethod("APSSPInterstitialAdClicked", argumentsMap("placementId", placementId));
-      }
-    });
-    interstitialAd.loadAd();
+        @Override
+        public void OnInterstitialClicked() {
+          if (channel != null)
+            channel.invokeMethod("APSSPInterstitialAdClicked", argumentsMap("placementId", placementId));
+        }
+      });
+      interstitialAd.loadAd();
+    }catch (Exception e){}
   }
 
   private void callShowInterstitial(@NonNull MethodCall call, @NonNull Result result)
   {
-    final String placementId = call.argument("placementId");
-    AdPopcornSSPInterstitialAd interstitialAd;
-    if(interstitialAdMap.containsKey(placementId))
-    {
-      interstitialAd = interstitialAdMap.get(placementId);
-    }
-    else
-    {
-      interstitialAd = new AdPopcornSSPInterstitialAd(context);
-    }
-    if(interstitialAd.isLoaded())
-      interstitialAd.showAd();
-    else
-      channel.invokeMethod("APSSPInterstitialAdShowFail", argumentsMap("placementId", placementId));
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPInterstitialAd interstitialAd;
+      if(interstitialAdMap.containsKey(placementId))
+      {
+        interstitialAd = interstitialAdMap.get(placementId);
+      }
+      else
+      {
+        interstitialAd = new AdPopcornSSPInterstitialAd(context);
+      }
+      if(interstitialAd.isLoaded()) {
+        interstitialAd.showAd();
+      }
+      else {
+        if(channel != null)
+          channel.invokeMethod("APSSPInterstitialAdShowFail", argumentsMap("placementId", placementId));
+      }
+    }catch (Exception e){}
   }
 
   private void callLoadInterstitialVideo(@NonNull MethodCall call, @NonNull Result result)
   {
-    final String placementId = call.argument("placementId");
-    AdPopcornSSPInterstitialVideoAd interstitialVideoAd;
-    if(interstitialVideoAdMap.containsKey(placementId))
-    {
-      interstitialVideoAd = interstitialVideoAdMap.get(placementId);
-    }
-    else
-    {
-      interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
-      interstitialVideoAdMap.put(placementId, interstitialVideoAd);
-    }
-    interstitialVideoAd.setPlacementId(placementId);
-    interstitialVideoAd.setEventCallbackListener(new IInterstitialVideoAdEventCallbackListener() {
-      @Override
-      public void OnInterstitialVideoAdLoaded() {
-        channel.invokeMethod("APSSPInterstitialVideoAdLoadSuccess", argumentsMap("placementId", placementId));
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPInterstitialVideoAd interstitialVideoAd;
+      if(interstitialVideoAdMap.containsKey(placementId))
+      {
+        interstitialVideoAd = interstitialVideoAdMap.get(placementId);
       }
-
-      @Override
-      public void OnInterstitialVideoAdLoadFailed(SSPErrorCode sspErrorCode) {
-        channel.invokeMethod("APSSPInterstitialVideoAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+      else
+      {
+        interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
+        interstitialVideoAdMap.put(placementId, interstitialVideoAd);
       }
+      interstitialVideoAd.setPlacementId(placementId);
+      interstitialVideoAd.setEventCallbackListener(new IInterstitialVideoAdEventCallbackListener() {
+        @Override
+        public void OnInterstitialVideoAdLoaded() {
+          if(channel != null)
+            channel.invokeMethod("APSSPInterstitialVideoAdLoadSuccess", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialVideoAdOpened() {
-        channel.invokeMethod("APSSPInterstitialVideoAdShowSuccess", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnInterstitialVideoAdLoadFailed(SSPErrorCode sspErrorCode) {
+          if(channel != null)
+            channel.invokeMethod("APSSPInterstitialVideoAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+        }
 
-      @Override
-      public void OnInterstitialVideoAdOpenFalied() {
-        channel.invokeMethod("APSSPInterstitialVideoAdShowFail", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnInterstitialVideoAdOpened() {
+          if(channel != null)
+            channel.invokeMethod("APSSPInterstitialVideoAdShowSuccess", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialVideoAdClosed() {
-        channel.invokeMethod("APSSPInterstitialVideoAdClosed", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnInterstitialVideoAdOpenFalied() {
+          if(channel != null)
+            channel.invokeMethod("APSSPInterstitialVideoAdShowFail", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnInterstitialVideoAdClicked() {
+        @Override
+        public void OnInterstitialVideoAdClosed() {
+          if(channel != null)
+            channel.invokeMethod("APSSPInterstitialVideoAdClosed", argumentsMap("placementId", placementId));
+        }
 
-      }
-    });
-    interstitialVideoAd.loadAd();
+        @Override
+        public void OnInterstitialVideoAdClicked() {
+
+        }
+      });
+      interstitialVideoAd.loadAd();
+    }catch (Exception e){}
   }
 
   private void callShowInterstitialVideo(@NonNull MethodCall call, @NonNull Result result)
   {
-    final String placementId = call.argument("placementId");
-    AdPopcornSSPInterstitialVideoAd interstitialVideoAd;
-    if(interstitialVideoAdMap.containsKey(placementId))
-    {
-      interstitialVideoAd = interstitialVideoAdMap.get(placementId);
-    }
-    else
-    {
-      interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
-    }
-    if(interstitialVideoAd.isReady())
-      interstitialVideoAd.showAd();
-    else
-      channel.invokeMethod("APSSPInterstitialVideoAdShowFail", argumentsMap("placementId", placementId));
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPInterstitialVideoAd interstitialVideoAd;
+      if(interstitialVideoAdMap.containsKey(placementId))
+      {
+        interstitialVideoAd = interstitialVideoAdMap.get(placementId);
+      }
+      else
+      {
+        interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
+      }
+      if(interstitialVideoAd.isReady()) {
+        interstitialVideoAd.showAd();
+      }
+      else {
+        if(channel != null)
+          channel.invokeMethod("APSSPInterstitialVideoAdShowFail", argumentsMap("placementId", placementId));
+      }
+    }catch (Exception e){}
   }
 
   private void callLoadRewardVideo(@NonNull MethodCall call, @NonNull Result result)
   {
-    final String placementId = call.argument("placementId");
-    AdPopcornSSPRewardVideoAd rewardVideoAd;
-    if(rewardVideoAdMap.containsKey(placementId))
-    {
-      rewardVideoAd = rewardVideoAdMap.get(placementId);
-    }
-    else
-    {
-      rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
-      rewardVideoAdMap.put(placementId, rewardVideoAd);
-    }
-    rewardVideoAd.setPlacementId(placementId);
-    rewardVideoAd.setRewardVideoAdEventCallbackListener(new IRewardVideoAdEventCallbackListener() {
-      @Override
-      public void OnRewardVideoAdLoaded() {
-        channel.invokeMethod("APSSPRewardVideoAdLoadSuccess", argumentsMap("placementId", placementId));
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPRewardVideoAd rewardVideoAd;
+      if(rewardVideoAdMap.containsKey(placementId))
+      {
+        rewardVideoAd = rewardVideoAdMap.get(placementId);
       }
-
-      @Override
-      public void OnRewardVideoAdLoadFailed(SSPErrorCode sspErrorCode) {
-        channel.invokeMethod("APSSPRewardVideoAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+      else
+      {
+        rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
+        rewardVideoAdMap.put(placementId, rewardVideoAd);
       }
+      rewardVideoAd.setPlacementId(placementId);
+      rewardVideoAd.setRewardVideoAdEventCallbackListener(new IRewardVideoAdEventCallbackListener() {
+        @Override
+        public void OnRewardVideoAdLoaded() {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardVideoAdLoadSuccess", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnRewardVideoAdOpened() {
-        channel.invokeMethod("APSSPRewardVideoAdShowSuccess", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnRewardVideoAdLoadFailed(SSPErrorCode sspErrorCode) {
+          channel.invokeMethod("APSSPRewardVideoAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+        }
 
-      @Override
-      public void OnRewardVideoAdOpenFalied() {
-        channel.invokeMethod("APSSPRewardVideoAdShowFail", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnRewardVideoAdOpened() {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardVideoAdShowSuccess", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnRewardVideoAdClosed() {
-        channel.invokeMethod("APSSPRewardVideoAdClosed", argumentsMap("placementId", placementId));
-      }
+        @Override
+        public void OnRewardVideoAdOpenFalied() {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardVideoAdShowFail", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnRewardVideoPlayCompleted(int adNetworkNo, boolean completed) {
-        channel.invokeMethod("APSSPRewardVideoAdPlayCompleted", argumentsMap("placementId", placementId, "adNetworkNo", adNetworkNo, "completed", completed));
-      }
+        @Override
+        public void OnRewardVideoAdClosed() {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardVideoAdClosed", argumentsMap("placementId", placementId));
+        }
 
-      @Override
-      public void OnRewardVideoAdClicked() {
+        @Override
+        public void OnRewardVideoPlayCompleted(int adNetworkNo, boolean completed) {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardVideoAdPlayCompleted", argumentsMap("placementId", placementId, "adNetworkNo", adNetworkNo, "completed", completed));
+        }
 
-      }
-    });
-    rewardVideoAd.loadAd();
+        @Override
+        public void OnRewardVideoAdClicked() {
+
+        }
+      });
+      rewardVideoAd.loadAd();
+    }catch (Exception e){}
   }
 
   private void callShowRewardVideo(@NonNull MethodCall call, @NonNull Result result)
   {
-    final String placementId = call.argument("placementId");
-    AdPopcornSSPRewardVideoAd rewardVideoAd;
-    if(rewardVideoAdMap.containsKey(placementId))
-    {
-      rewardVideoAd = rewardVideoAdMap.get(placementId);
-    }
-    else
-    {
-      rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
-    }
-    if(rewardVideoAd.isReady())
-      rewardVideoAd.showAd();
-    else
-      channel.invokeMethod("APSSPRewardVideoAdShowFail", argumentsMap("placementId", placementId));
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPRewardVideoAd rewardVideoAd;
+      if(rewardVideoAdMap.containsKey(placementId))
+      {
+        rewardVideoAd = rewardVideoAdMap.get(placementId);
+      }
+      else
+      {
+        rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
+      }
+      if(rewardVideoAd.isReady()) {
+        rewardVideoAd.showAd();
+      }
+      else {
+        if(channel != null)
+          channel.invokeMethod("APSSPRewardVideoAdShowFail", argumentsMap("placementId", placementId));
+      }
+    }catch (Exception e){}
   }
 
   private Map<String, Object> argumentsMap(Object... args) {
     Map<String, Object> arguments = new HashMap<>();
-    for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
+    try{
+      for (int i = 0; i < args.length; i += 2) arguments.put(args[i].toString(), args[i + 1]);
+    }catch (Exception e){}
     return arguments;
   }
 

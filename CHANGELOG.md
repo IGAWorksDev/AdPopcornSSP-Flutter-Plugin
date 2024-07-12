@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Fix Android initialize crash issue.
+
 ## 1.0.1
 
 * Add android native height option.
