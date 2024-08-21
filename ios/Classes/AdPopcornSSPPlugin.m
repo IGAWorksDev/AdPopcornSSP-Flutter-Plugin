@@ -2,7 +2,7 @@
 #import "AdPopcornSSPPlugin.h"
 
 @interface AdPopcornSSPPlugin() <APSSPSDKInitializeDelegate, APSSPInterstitialAdDelegate,
-    APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate>
+    APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate>
 @end
 
 @implementation AdPopcornSSPPlugin
@@ -11,6 +11,7 @@
 @synthesize interstitialDictionary = _interstitialDictionary;
 @synthesize interstitialVideoDictionary = _interstitialVideoDictionary;
 @synthesize rewardVideoDictionary = _rewardVideoDictionary;
+@synthesize contentsDictionary = _contentsDictionary;
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
@@ -44,6 +45,11 @@
     if(_rewardVideoDictionary == nil)
     {
         _rewardVideoDictionary = [[NSMutableDictionary alloc] init];
+    }
+    
+    if(_contentsDictionary == nil)
+    {
+        _contentsDictionary = [[NSMutableDictionary alloc] init];
     }
     
     if([@"init" isEqualToString:call.method])
@@ -81,6 +87,10 @@
     else if([@"showRewardVideo" isEqualToString:call.method])
     {
         [self callShowRewardVideo:call result:result];
+    }
+    else if([@"openContents" isEqualToString:call.method])
+    {
+        [self callOpenContents:call result:result];
     }
     else
     {
@@ -302,6 +312,34 @@
     }
 }
 
+- (void)callOpenContents:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    NSString* placementId = (NSString*)call.arguments[@"placementId"];
+    if(appKey == nil || appKey.length == 0) {
+        result([FlutterError errorWithCode:@"no_app_key" message:@"a nil or empty AdPopcornSSP appKey was provided" details:nil]);
+        return;
+    }
+    if (placementId == nil || placementId.length == 0) {
+        result([FlutterError errorWithCode:@"no_placement_id" message:@"a nil or empty AdPopcornSSP placementId was provided" details:nil]);
+        return;
+    }
+    
+    AdPopcornSSPContentsAd *contentsAd;
+    if([_contentsDictionary objectForKey:placementId])
+    {
+        NSLog(@"callOpenContents already exist contents ad placementId : %@", placementId);
+        contentsAd = [_contentsDictionary objectForKey:placementId];
+    }
+    else
+    {
+        NSLog(@"callOpenContents placementId : %@", placementId);
+        contentsAd = [[AdPopcornSSPContentsAd alloc] initWithAppKey:appKey contentsPlacementId:placementId viewController:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
+        [_contentsDictionary setObject:contentsAd forKey:placementId];
+    }
+    contentsAd.delegate = self;
+    [contentsAd openContents];
+}
+
 #pragma mark APSSPSDKInitializeDelegate
 - (void)AdPopcornSSPSDKDidInitialize
 {
@@ -501,5 +539,30 @@
                      arguments:@{@"placementId":rewardVideoAd.placementId != nil ? rewardVideoAd.placementId : @"",
                                  @"adNetworkNo":@(adNetworkNo),
                                  @"completed":@(completed)}];
+}
+
+#pragma mark APSSPContentsAdDelegate
+- (void)APSSPContentsAdOpenSuccess:(AdPopcornSSPContentsAd *)contentsAd
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPContentsAdOpenSuccess");
+    [_channel invokeMethod:@"ContentsAdOpenSuccess" arguments:@{}];
+}
+
+- (void)APSSPContentsAdOpenFail:(AdPopcornSSPContentsAd *)contentsAd error:(AdPopcornSSPError *)error
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPContentsAdOpenFail");
+    [_channel invokeMethod:@"ContentsAdOpenFail" arguments:@{}];
+}
+
+- (void)APSSPContentsAdClosed:(AdPopcornSSPContentsAd *)contentsAd
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPContentsAdClosed");
+    [_channel invokeMethod:@"ContentsAdClosed" arguments:@{}];
+}
+
+- (void)APSSPContentsAdComplete:(AdPopcornSSPContentsAd *)contentsAd reward:(NSInteger)reward
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPContentsAdComplete");
+    [_channel invokeMethod:@"ContentsAdCompleted" arguments:@{@"reward":@(reward)}];
 }
 @end

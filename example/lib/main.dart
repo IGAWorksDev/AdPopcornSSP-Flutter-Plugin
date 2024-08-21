@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     if (Platform.isAndroid) {
       AdPopcornSSP.init('663451319');
+      AdPopcornSSP.setUserId('TEST_ANDROID');
       // 전면 비디오 연동
       AdPopcornSSP.loadInterstitial('663451319', 'INTERSTITIAL');
       AdPopcornSSP.interstitialAdLoadSuccessListener = (placementId) {
@@ -45,13 +46,25 @@ class _MyAppState extends State<MyApp> {
       AdPopcornSSP.rewardVideoAdLoadSuccessListener = (placementId) {
         // AdPopcornSSP.showRewardVideo('663451319', placementId);
       };
+      
+      // 콘텐츠 광고 연동(오늘의 날씨)
+      AdPopcornSSP.openContents('800296516', 'TEST_WEATHER');
+      AdPopcornSSP.contentsAdOpenSuccessListener = () {
+        print('main.dart contentsAdOpenSuccessListener');
+      };
+      AdPopcornSSP.contentsAdClosedListener = () {
+        print('main.dart contentsAdClosedListener');
+      };
+      AdPopcornSSP.contentsAdCompletedListener = (reward) {
+        print('main.dart contentsAdCompletedListener');
+      };
 
       // 배너, 네이티브 이벤트 채널 연동
       androidBannerChannel.setMethodCallHandler(_eventHandleMethod);
       androidNativeChannel.setMethodCallHandler(_eventHandleMethod);
     } else if (Platform.isIOS) {
       AdPopcornSSP.init('397261446');
-
+      AdPopcornSSP.setUserId('TEST_IOS');
       // 전면 연동
       AdPopcornSSP.loadInterstitial('397261446', 'iOS_INTERSTITIAL');
       AdPopcornSSP.interstitialAdLoadSuccessListener = (placementId) {
@@ -68,6 +81,14 @@ class _MyAppState extends State<MyApp> {
       AdPopcornSSP.loadRewardVideo('397261446', 'iOS_REWARD_VIDEO');
       AdPopcornSSP.rewardVideoAdLoadSuccessListener = (placementId) {
         //AdPopcornSSP.showRewardVideo('397261446', placementId);
+      };
+      
+      AdPopcornSSP.openContents('800296516', 'TEST_WEATHER');
+      AdPopcornSSP.contentsAdOpenSuccessListener = () {
+      };
+      AdPopcornSSP.contentsAdClosedListener = () {
+      };
+      AdPopcornSSP.contentsAdCompletedListener = (reward) {
       };
 
       // 배너, 네이티브 이벤트 채널 연동

@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import com.igaworks.ssp.AdPopcornSSP;
 import com.igaworks.ssp.SSPErrorCode;
 import com.igaworks.ssp.SdkInitListener;
+import com.igaworks.ssp.part.contents.AdPopcornSSPContentsAd;
+import com.igaworks.ssp.part.contents.listener.IContentsAdEventCallbackListener;
 import com.igaworks.ssp.part.interstitial.AdPopcornSSPInterstitialAd;
 import com.igaworks.ssp.part.interstitial.listener.IInterstitialEventCallbackListener;
 import com.igaworks.ssp.part.video.AdPopcornSSPInterstitialVideoAd;
@@ -40,7 +42,7 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
   private Map<String, AdPopcornSSPInterstitialAd> interstitialAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPInterstitialVideoAd> interstitialVideoAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPRewardVideoAd> rewardVideoAdMap = new HashMap<>();
-
+  private Map<String, AdPopcornSSPContentsAd> contentsAdMap = new HashMap<>();
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     this.flutterPluginBinding = flutterPluginBinding;
@@ -85,6 +87,8 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       interstitialVideoAdMap = new HashMap<>();
     if(rewardVideoAdMap == null)
       rewardVideoAdMap = new HashMap<>();
+    if(contentsAdMap == null)
+      contentsAdMap = new HashMap<>();
   }
 
   @Override
@@ -108,6 +112,8 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         callLoadRewardVideo(call, result);
       } else if (call.method.equals("showRewardVideo")) {
         callShowRewardVideo(call, result);
+      } else if (call.method.equals("openContents")) {
+        callOpenContents(call, result);
       } else {
         result.notImplemented();
       }
@@ -377,6 +383,50 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         if(channel != null)
           channel.invokeMethod("APSSPRewardVideoAdShowFail", argumentsMap("placementId", placementId));
       }
+    }catch (Exception e){}
+  }
+
+  private void callOpenContents(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPContentsAd contentsAd;
+      if(contentsAdMap.containsKey(placementId))
+      {
+        contentsAd = contentsAdMap.get(placementId);
+      }
+      else
+      {
+        contentsAd = new AdPopcornSSPContentsAd(context);
+        contentsAdMap.put(placementId, contentsAd);
+      }
+      contentsAd.setPlacementId(placementId);
+      contentsAd.setContentsAdEventCallbackListener(new IContentsAdEventCallbackListener() {
+        @Override
+        public void OnContentsAdOpened() {
+          if(channel != null)
+            channel.invokeMethod("ContentsAdOpenSuccess", argumentsMap());
+        }
+
+        @Override
+        public void OnContentsAdOpenFailed(SSPErrorCode sspErrorCode) {
+          if(channel != null)
+            channel.invokeMethod("ContentsAdOpenFail", argumentsMap());
+        }
+
+        @Override
+        public void OnContentsAdClosed() {
+          if(channel != null)
+            channel.invokeMethod("ContentsAdClosed", argumentsMap());
+        }
+
+        @Override
+        public void OnContentsAdCompleted(long reward) {
+          if(channel != null)
+            channel.invokeMethod("ContentsAdCompleted", argumentsMap("reward", reward));
+        }
+      });
+      contentsAd.openContents();
     }catch (Exception e){}
   }
 
