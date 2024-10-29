@@ -1,3 +1,10 @@
+## 1.0.4
+
+* Change contentsAd callback.
+* Add rewardPlus api 
+* Add coppa api
+* Add UID api
+
 ## 1.0.3
 
 * Add contentsAd campaign.
