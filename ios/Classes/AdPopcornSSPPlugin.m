@@ -2,7 +2,7 @@
 #import "AdPopcornSSPPlugin.h"
 
 @interface AdPopcornSSPPlugin() <APSSPSDKInitializeDelegate, APSSPInterstitialAdDelegate,
-    APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate>
+    APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate>
 @end
 
 @implementation AdPopcornSSPPlugin
@@ -64,6 +64,14 @@
     {
       [self callSetLogLevel:call result:result];
     }
+    else if([@"setUIDIdentifier" isEqualToString:call.method])
+    {
+      [self callSetUIDIdentifier:call result:result];
+    }
+    else if([@"tagForChildDirectedTreatment" isEqualToString:call.method])
+    {
+      [self callTagForChildDirectedTreatment:call result:result];
+    }
     else if([@"loadInterstitial" isEqualToString:call.method])
     {
       [self callLoadInterstitial:call result:result];
@@ -91,6 +99,14 @@
     else if([@"openContents" isEqualToString:call.method])
     {
         [self callOpenContents:call result:result];
+    }
+    else if([@"openRewardPlusSetting" isEqualToString:call.method])
+    {
+        [self callOpenRewardPlusSetting:call result:result];
+    }
+    else if([@"getRewardPlusUserSetting" isEqualToString:call.method])
+    {
+        [self callGetRewardPlusUserSetting:call result:result];
     }
     else
     {
@@ -145,6 +161,35 @@
     {
         [AdPopcornSSP setLogLevel:AdPopcornSSPLogTrace];
     }
+}
+
+- (void)callSetUIDIdentifier:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* identityType = (NSString*)call.arguments[@"identityType"];
+    NSString* identifier = (NSString*)call.arguments[@"identifier"];
+    
+    int type = 0;
+    if(identityType != nil)
+    {
+        if([identityType isEqualToString:@"phone"])
+        {
+            type = 1;
+        }
+    }
+    [AdPopcornSSP setUIDIdentifier:type identifier:identifier];
+}
+
+- (void)callTagForChildDirectedTreatment:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* tag = (NSString*)call.arguments[@"tag"];
+    
+    BOOL tagInput = NO;
+    if(tag != nil)
+    {
+        if([tag isEqualToString:@"true"])
+        {
+            tagInput = YES;
+        }
+    }
+    [AdPopcornSSP tagForChildDirectedTreatment:tagInput];
 }
 
 - (void)callLoadInterstitial:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -340,11 +385,32 @@
     [contentsAd openContents];
 }
 
+- (void)callOpenRewardPlusSetting:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    [AdPopcornSSP openRewardPlusSettingViewController:appKey viewCotroller:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
+}
+
+- (void)callGetRewardPlusUserSetting:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    [AdPopcornSSP sharedInstance].rewardPlusDelegate = self;
+    [AdPopcornSSP getRewardPlusUserSetting:appKey];
+}
+
 #pragma mark APSSPSDKInitializeDelegate
 - (void)AdPopcornSSPSDKDidInitialize
 {
     NSLog(@"AdPopcornSSPPlugin AdPopcornSSPSDKDidInitialize");
     [_channel invokeMethod:@"AdPopcornSSPSDKDidInitialize" arguments:@{}];
+}
+
+#pragma mark APSSPRewardPlusSettingDelegate
+- (void)APSSPRewardPlusSettingInfo:(NSString *)connectedId dailyUserLimit:(int)dailyUserLimit dailyUserCount:(int)dailyUserCount
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPRewardPlusSettingInfo");
+    [_channel invokeMethod:@"APSSPRewardPlusSettingInfo"
+                     arguments:@{@"connectedId":connectedId != nil ? connectedId : @"",
+                                 @"dailyUserLimit":@(dailyUserLimit),
+                                 @"dailyUserCount":@(dailyUserCount)}];
 }
 
 #pragma mark APSSPInterstitialAdDelegate
@@ -541,6 +607,19 @@
                                  @"completed":@(completed)}];
 }
 
+/*!
+ @abstract
+ AP SSP reward plus 리워드 적립 요청 완료 시 호출된다.
+ */
+- (void)APSSPRewardPlusCompleteResult:(BOOL)result resultCode:(int) resultCode reward:(int)reward
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPRewardPlusCompleteResult");
+    [_channel invokeMethod:@"APSSPRewardPlusCompleteResult"
+                     arguments:@{@"result":@(result),
+                                 @"resultCode":@(resultCode),
+                                 @"reward":@(reward)}];
+}
+
 #pragma mark APSSPContentsAdDelegate
 - (void)APSSPContentsAdOpenSuccess:(AdPopcornSSPContentsAd *)contentsAd
 {
@@ -560,9 +639,10 @@
     [_channel invokeMethod:@"ContentsAdClosed" arguments:@{}];
 }
 
-- (void)APSSPContentsAdComplete:(AdPopcornSSPContentsAd *)contentsAd reward:(NSInteger)reward
-{
+- (void)APSSPContentsAdComplete:(AdPopcornSSPContentsAd *)contentsAd reward:(NSInteger)reward rewardKey:(NSString *)rewardKey { 
     NSLog(@"AdPopcornSSPPlugin APSSPContentsAdComplete");
-    [_channel invokeMethod:@"ContentsAdCompleted" arguments:@{@"reward":@(reward)}];
+    [_channel invokeMethod:@"ContentsAdCompleted" 
+                 arguments:@{@"reward":@(reward),
+                             @"rewardKey":rewardKey}];
 }
 @end

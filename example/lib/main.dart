@@ -29,6 +29,7 @@ class _MyAppState extends State<MyApp> {
     if (Platform.isAndroid) {
       AdPopcornSSP.init('663451319');
       AdPopcornSSP.setUserId('TEST_ANDROID');
+      
       // 전면 비디오 연동
       AdPopcornSSP.loadInterstitial('663451319', 'INTERSTITIAL');
       AdPopcornSSP.interstitialAdLoadSuccessListener = (placementId) {
@@ -55,8 +56,8 @@ class _MyAppState extends State<MyApp> {
       AdPopcornSSP.contentsAdClosedListener = () {
         print('main.dart contentsAdClosedListener');
       };
-      AdPopcornSSP.contentsAdCompletedListener = (reward) {
-        print('main.dart contentsAdCompletedListener');
+      AdPopcornSSP.contentsAdCompletedListener = (reward, rewardKey) {
+          print('main.dart contentsAdCompletedListener : ${rewardKey}');
       };
 
       // 배너, 네이티브 이벤트 채널 연동
@@ -65,6 +66,7 @@ class _MyAppState extends State<MyApp> {
     } else if (Platform.isIOS) {
       AdPopcornSSP.init('397261446');
       AdPopcornSSP.setUserId('TEST_IOS');
+      
       // 전면 연동
       AdPopcornSSP.loadInterstitial('397261446', 'iOS_INTERSTITIAL');
       AdPopcornSSP.interstitialAdLoadSuccessListener = (placementId) {
@@ -84,13 +86,12 @@ class _MyAppState extends State<MyApp> {
       };
       
       AdPopcornSSP.openContents('800296516', 'TEST_WEATHER');
-      AdPopcornSSP.contentsAdOpenSuccessListener = () {
+      AdPopcornSSP.contentsAdOpenSuccessListener = () { };
+      AdPopcornSSP.contentsAdClosedListener = () { };
+      AdPopcornSSP.contentsAdCompletedListener = (reward, rewardKey) {
+          print('main.dart contentsAdCompletedListener : ${rewardKey}');
       };
-      AdPopcornSSP.contentsAdClosedListener = () {
-      };
-      AdPopcornSSP.contentsAdCompletedListener = (reward) {
-      };
-
+      
       // 배너, 네이티브 이벤트 채널 연동
       iosBannerChannel.setMethodCallHandler(_eventHandleMethod);
       iosNativeChannel.setMethodCallHandler(_eventHandleMethod);

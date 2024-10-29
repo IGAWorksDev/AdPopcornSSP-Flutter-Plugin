@@ -1,9 +1,9 @@
 package com.adpopcorn.adpopcornssp_flutter;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.igaworks.ssp.AdPopcornSSP;
@@ -16,6 +16,7 @@ import com.igaworks.ssp.part.interstitial.listener.IInterstitialEventCallbackLis
 import com.igaworks.ssp.part.video.AdPopcornSSPInterstitialVideoAd;
 import com.igaworks.ssp.part.video.AdPopcornSSPRewardVideoAd;
 import com.igaworks.ssp.part.video.listener.IInterstitialVideoAdEventCallbackListener;
+import com.igaworks.ssp.part.video.listener.IRewardPlusSettingEventCallbackListener;
 import com.igaworks.ssp.part.video.listener.IRewardVideoAdEventCallbackListener;
 
 import java.util.HashMap;
@@ -100,6 +101,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         callUserId(call, result);
       } else if (call.method.equals("setLogEnable")) {
         callSetLogEnable(call, result);
+      } else if (call.method.equals("setUIDIdentifier")) {
+        callSetUIDIdentifier(call, result);
+      } else if (call.method.equals("tagForChildDirectedTreatment")) {
+        callTagForChildDirectedTreatment(call, result);
       } else if (call.method.equals("loadInterstitial")) {
         callLoadInterstitial(call, result);
       } else if (call.method.equals("showInterstitial")) {
@@ -114,6 +119,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         callShowRewardVideo(call, result);
       } else if (call.method.equals("openContents")) {
         callOpenContents(call, result);
+      } else if (call.method.equals("openRewardPlusSetting")) {
+        callOpenRewardPlusSetting(call, result);
+      } else if (call.method.equals("getRewardPlusUserSetting")) {
+        callGetRewardPlusUserSetting(call, result);
       } else {
         result.notImplemented();
       }
@@ -126,8 +135,13 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       @Override
       public void onInitializationFinished() {
         try {
-          if (channel != null)
-            channel.invokeMethod("AdPopcornSSPSDKDidInitialize", argumentsMap());
+          new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+              if (channel != null)
+                channel.invokeMethod("AdPopcornSSPSDKDidInitialize", argumentsMap());
+            }
+          });
         }catch (Exception e){}
       }
     });
@@ -147,6 +161,25 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
   {
     final boolean enable = call.argument("enable");
     AdPopcornSSP.setLogEnable(enable);
+  }
+
+  private void callSetUIDIdentifier(@NonNull MethodCall call, @NonNull Result result)
+  {
+    String identityType = call.argument("identityType");
+    String identifier = call.argument("identifier");
+    if(identityType != null && identityType.equals("phone"))
+      AdPopcornSSP.setUIDIdentifier(context, 1, identifier);
+    else
+      AdPopcornSSP.setUIDIdentifier(context, 0, identifier);
+  }
+
+  private void callTagForChildDirectedTreatment(@NonNull MethodCall call, @NonNull Result result)
+  {
+    String tag = call.argument("tag");
+    if(tag != null && tag.equals("true"))
+      AdPopcornSSP.tagForChildDirectedTreatment(context, true);
+    else
+      AdPopcornSSP.tagForChildDirectedTreatment(context, false);
   }
 
   private void callLoadInterstitial(@NonNull MethodCall call, @NonNull Result result)
@@ -358,6 +391,12 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         public void OnRewardVideoAdClicked() {
 
         }
+
+        @Override
+        public void OnRewardPlusCompleted(boolean b, int i, int i1) {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardPlusCompleteResult", argumentsMap("placementId", placementId));
+        }
       });
       rewardVideoAd.loadAd();
     }catch (Exception e){}
@@ -421,12 +460,39 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         }
 
         @Override
-        public void OnContentsAdCompleted(long reward) {
+        public void OnContentsAdCompleted(long reward, String rewardKey) {
           if(channel != null)
-            channel.invokeMethod("ContentsAdCompleted", argumentsMap("reward", reward));
+            channel.invokeMethod("ContentsAdCompleted", argumentsMap("reward", reward, "rewardKey", rewardKey));
         }
       });
       contentsAd.openContents();
+    }catch (Exception e){}
+  }
+
+  private void callOpenRewardPlusSetting(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      AdPopcornSSP.openRewardPlusSetting(context);
+    }catch (Exception e){}
+  }
+
+  private void callGetRewardPlusUserSetting(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      AdPopcornSSP.getRewardPlusUserSetting(new IRewardPlusSettingEventCallbackListener() {
+        @Override
+        public void OnRewardPlusUserSettingInfo(String connectedId, int dailyUserLimit, int dailyUserCount) {
+          new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+              if(channel != null)
+                channel.invokeMethod("APSSPRewardPlusSettingInfo",
+                        argumentsMap("connectedId", connectedId, "dailyUserLimit", dailyUserLimit,
+                                "dailyUserCount", dailyUserCount));
+            }
+          });
+        }
+      });
     }catch (Exception e){}
   }
 

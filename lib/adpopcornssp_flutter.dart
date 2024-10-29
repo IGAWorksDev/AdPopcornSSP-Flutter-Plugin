@@ -38,13 +38,17 @@ typedef void RewardVideoAdClosed(String placementId);
 
 typedef void RewardVideoAdCompleted(String placementId, int adNetworkNo, bool completed);
 
+typedef void RewardPlusCompleted(bool result, int resultCode, int reward);
+
 typedef void ContentsAdOpenSuccess();
 
 typedef void ContentsAdOpenFail();
 
 typedef void ContentsAdClosed();
 
-typedef void ContentsAdCompleted(int reward);
+typedef void ContentsAdCompleted(int reward, String rewardKey);
+
+typedef void RewardPlusSettingInfo(String connectedId, int dailyUserLimit, int dailyUserCount);
 
 class AdPopcornSSP {
   static const MethodChannel _channel = const MethodChannel('adpopcornssp');
@@ -85,6 +89,8 @@ class AdPopcornSSP {
 
   static RewardVideoAdCompleted? rewardVideoAdCompletedListener;
   
+  static RewardPlusCompleted? rewardPlusCompletedListener;
+  
   static ContentsAdOpenSuccess? contentsAdOpenSuccessListener;
   
   static ContentsAdOpenFail? contentsAdOpenFailListener;
@@ -92,6 +98,8 @@ class AdPopcornSSP {
   static ContentsAdClosed? contentsAdClosedListener;
   
   static ContentsAdCompleted? contentsAdCompletedListener;
+  
+  static RewardPlusSettingInfo? rewardPlusSettingInfoListener;
   
   static void init(String appKey) {
     //register callback method handler
@@ -117,6 +125,32 @@ class AdPopcornSSP {
 
     _channel.invokeMethod('setLogLevel', <String, dynamic>{
       'logLevel': logLevel,
+    });
+  }
+  
+  static void setUIDIdentifier(int identityType, String identifier) {
+    //register callback method handler
+    _channel.setMethodCallHandler(_handleMethod);
+
+    String identityTypeString = 'email';
+    if(identityType == 1)
+        identityTypeString = 'phone';
+        
+    _channel.invokeMethod('setUIDIdentifier', <String, dynamic>{
+      'identityType': identityTypeString,
+      'identifier': identifier,
+    });
+  }
+  
+  static void tagForChildDirectedTreatment(bool tag) {
+    //register callback method handler
+    _channel.setMethodCallHandler(_handleMethod);
+    
+    String tagString = 'false';
+    if(tag)
+        tagString = 'true';
+    _channel.invokeMethod('tagForChildDirectedTreatment', <String, dynamic>{
+      'tag': tagString,
     });
   }
   
@@ -166,6 +200,18 @@ class AdPopcornSSP {
     _channel.invokeMethod('openContents', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
+    });
+  }
+  
+  static void openRewardPlusSetting(String appKey) {
+    _channel.invokeMethod('openRewardPlusSetting', <String, dynamic>{
+      'appKey': appKey,
+    });
+  }
+  
+  static void getRewardPlusUserSetting(String appKey) {
+    _channel.invokeMethod('getRewardPlusUserSetting', <String, dynamic>{
+      'appKey': appKey,
     });
   }
 
@@ -269,6 +315,13 @@ class AdPopcornSSP {
         if (rewardVideoAdCompletedListener != null){
             rewardVideoAdCompletedListener!(placementId, adNetworkNo, completed);
         }
+      } else if (method == 'APSSPRewardPlusCompleted') {
+        final bool result = arguments['result'];
+        final int resultCode = arguments['resultCode'];
+        final int reward = arguments['reward'];
+        if (rewardPlusCompletedListener != null){
+            rewardPlusCompletedListener!(result, resultCode, reward);
+        }
       }
       else if (method == 'ContentsAdOpenSuccess') {
         if (contentsAdOpenSuccessListener != null) {
@@ -284,8 +337,16 @@ class AdPopcornSSP {
         }
       } else if (method == 'ContentsAdCompleted') {
         final int reward = arguments['reward'];
+        final String rewardKey = arguments['rewardKey'];
         if (contentsAdCompletedListener != null) {
-            contentsAdCompletedListener!(reward);
+            contentsAdCompletedListener!(reward, rewardKey);
+        }
+      } else if (method == 'APSSPRewardPlusSettingInfo') {
+        final String connectedId = arguments['connectedId'];
+        final int dailyUserLimit = arguments['dailyUserLimit'];
+        final int dailyUserCount = arguments['dailyUserCount'];
+        if (rewardPlusSettingInfoListener != null) {
+              rewardPlusSettingInfoListener!(connectedId, dailyUserLimit, dailyUserCount);
         }
       }
     }
