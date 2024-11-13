@@ -1,3 +1,7 @@
+## 1.0.5
+* Fix native click error : xcode16&ios18
+* Android 3.6.8, iOS 2.8.5
+
 ## 1.0.4
 
 * Change contentsAd callback.
