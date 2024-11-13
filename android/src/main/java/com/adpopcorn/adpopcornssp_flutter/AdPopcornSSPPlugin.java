@@ -1,5 +1,6 @@
 package com.adpopcorn.adpopcornssp_flutter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,7 +39,7 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
-  private Context context;
+  private Context context, activityContext;
   private FlutterPluginBinding flutterPluginBinding;
   private Map<String, AdPopcornSSPInterstitialAd> interstitialAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPInterstitialVideoAd> interstitialVideoAdMap = new HashMap<>();
@@ -58,6 +59,7 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
             .registerViewFactory("AdPopcornSSPBannerView", new AdPopcornSSPFLBannerViewFactory(binding.getActivity(), flutterPluginBinding.getBinaryMessenger()));
     flutterPluginBinding.getPlatformViewRegistry()
             .registerViewFactory("AdPopcornSSPNativeView", new AdPopcornSSPFLNativeViewFactory(binding.getActivity(), flutterPluginBinding.getBinaryMessenger()));
+    activityContext = binding.getActivity();
   }
 
   @Override
@@ -67,12 +69,11 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
 
   @Override
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-
+    activityContext = binding.getActivity();
   }
 
   @Override
   public void onDetachedFromActivity() {
-
   }
 
   private static void setup(AdPopcornSSPPlugin plugin, BinaryMessenger binaryMessenger) {
@@ -190,7 +191,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       if (interstitialAdMap.containsKey(placementId)) {
         interstitialAd = interstitialAdMap.get(placementId);
       } else {
-        interstitialAd = new AdPopcornSSPInterstitialAd(context);
+        if(activityContext != null)
+          interstitialAd = new AdPopcornSSPInterstitialAd(activityContext);
+        else
+          interstitialAd = new AdPopcornSSPInterstitialAd(context);
         interstitialAdMap.put(placementId, interstitialAd);
       }
       interstitialAd.setPlacementId(placementId);
@@ -243,10 +247,15 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       if(interstitialAdMap.containsKey(placementId))
       {
         interstitialAd = interstitialAdMap.get(placementId);
+        if(activityContext != null && activityContext instanceof Activity)
+          interstitialAd.setCurrentActivity((Activity)activityContext);
       }
       else
       {
-        interstitialAd = new AdPopcornSSPInterstitialAd(context);
+        if(activityContext != null)
+          interstitialAd = new AdPopcornSSPInterstitialAd(activityContext);
+        else
+          interstitialAd = new AdPopcornSSPInterstitialAd(context);
       }
       if(interstitialAd.isLoaded()) {
         interstitialAd.showAd();
@@ -269,7 +278,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       }
       else
       {
-        interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
+        if(activityContext != null)
+          interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(activityContext);
+        else
+          interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
         interstitialVideoAdMap.put(placementId, interstitialVideoAd);
       }
       interstitialVideoAd.setPlacementId(placementId);
@@ -321,10 +333,15 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       if(interstitialVideoAdMap.containsKey(placementId))
       {
         interstitialVideoAd = interstitialVideoAdMap.get(placementId);
+        if(activityContext != null && activityContext instanceof Activity)
+          interstitialVideoAd.setCurrentActivity((Activity)activityContext);
       }
       else
       {
-        interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
+        if(activityContext != null)
+          interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(activityContext);
+        else
+          interstitialVideoAd = new AdPopcornSSPInterstitialVideoAd(context);
       }
       if(interstitialVideoAd.isReady()) {
         interstitialVideoAd.showAd();
@@ -347,7 +364,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       }
       else
       {
-        rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
+        if(activityContext != null)
+          rewardVideoAd = new AdPopcornSSPRewardVideoAd(activityContext);
+        else
+          rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
         rewardVideoAdMap.put(placementId, rewardVideoAd);
       }
       rewardVideoAd.setPlacementId(placementId);
@@ -410,10 +430,15 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       if(rewardVideoAdMap.containsKey(placementId))
       {
         rewardVideoAd = rewardVideoAdMap.get(placementId);
+        if(activityContext != null && activityContext instanceof Activity)
+          rewardVideoAd.setCurrentActivity((Activity)activityContext);
       }
       else
       {
-        rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
+        if(activityContext != null)
+          rewardVideoAd = new AdPopcornSSPRewardVideoAd(activityContext);
+        else
+          rewardVideoAd = new AdPopcornSSPRewardVideoAd(context);
       }
       if(rewardVideoAd.isReady()) {
         rewardVideoAd.showAd();
@@ -507,6 +532,7 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     context = null;
+    activityContext = null;
     if(channel != null) {
       channel.setMethodCallHandler(null);
       channel = null;

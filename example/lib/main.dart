@@ -30,26 +30,26 @@ class _MyAppState extends State<MyApp> {
       AdPopcornSSP.init('663451319');
       AdPopcornSSP.setUserId('TEST_ANDROID');
       
-      // 전면 비디오 연동
+      // 전면 연동
       AdPopcornSSP.loadInterstitial('663451319', 'INTERSTITIAL');
       AdPopcornSSP.interstitialAdLoadSuccessListener = (placementId) {
-        //AdPopcornSSP.showInterstitial('663451319', placementId);
+        // AdPopcornSSP.showInterstitial('663451319', placementId);
       };
 
       // 전면 비디오 연동
       AdPopcornSSP.loadInterstitialVideo('663451319', 'VIDEO');
       AdPopcornSSP.interstitialVideoAdLoadSuccessListener = (placementId) {
-       //  AdPopcornSSP.showInterstitialVideo('663451319', placementId);
+         //AdPopcornSSP.showInterstitialVideo('663451319', placementId);
       };
 
       // 리워드 비디오 연동
       AdPopcornSSP.loadRewardVideo('663451319', 'REWARD_VIDEO');
       AdPopcornSSP.rewardVideoAdLoadSuccessListener = (placementId) {
-        // AdPopcornSSP.showRewardVideo('663451319', placementId);
+         //AdPopcornSSP.showRewardVideo('663451319', placementId);
       };
       
       // 콘텐츠 광고 연동(오늘의 날씨)
-      AdPopcornSSP.openContents('800296516', 'TEST_WEATHER');
+      /*AdPopcornSSP.openContents('800296516', 'TEST_WEATHER');
       AdPopcornSSP.contentsAdOpenSuccessListener = () {
         print('main.dart contentsAdOpenSuccessListener');
       };
@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
       };
       AdPopcornSSP.contentsAdCompletedListener = (reward, rewardKey) {
           print('main.dart contentsAdCompletedListener : ${rewardKey}');
-      };
+      };*/
 
       // 배너, 네이티브 이벤트 채널 연동
       androidBannerChannel.setMethodCallHandler(_eventHandleMethod);
