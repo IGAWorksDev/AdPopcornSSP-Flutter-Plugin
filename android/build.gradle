@@ -34,6 +34,6 @@ android {
     }
 
     dependencies {
-        implementation 'com.igaworks.ssp:IgawAdPopcornSSP:3.6.8'
+        implementation 'com.igaworks.ssp:IgawAdPopcornSSP:3.7.0'
     }
 }

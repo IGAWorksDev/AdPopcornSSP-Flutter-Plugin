@@ -1,3 +1,6 @@
+## 1.0.7
+* Android 3.7.0, iOS 2.9.0
+
 ## 1.0.6
 * Fix android context error(use activity context)
 
