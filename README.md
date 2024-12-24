@@ -13,7 +13,7 @@ Add dependencies on pubspec.yaml
 
 ```
 dependencies:
-  adpopcornssp_flutter: ^1.0.7
+  adpopcornssp_flutter: ^1.0.8
 ```
 
 ## Integration Guide

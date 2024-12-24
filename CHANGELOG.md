@@ -1,3 +1,6 @@
+## 1.0.8
+* Add android namespace
+
 ## 1.0.7
 * Android 3.7.0, iOS 2.9.0
 
