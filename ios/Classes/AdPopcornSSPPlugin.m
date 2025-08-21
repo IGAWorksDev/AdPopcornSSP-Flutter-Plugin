@@ -2,7 +2,7 @@
 #import "AdPopcornSSPPlugin.h"
 
 @interface AdPopcornSSPPlugin() <APSSPSDKInitializeDelegate, APSSPInterstitialAdDelegate,
-    APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate>
+APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate, APSSPPopContentsAdDelegate>
 @end
 
 @implementation AdPopcornSSPPlugin
@@ -12,6 +12,7 @@
 @synthesize interstitialVideoDictionary = _interstitialVideoDictionary;
 @synthesize rewardVideoDictionary = _rewardVideoDictionary;
 @synthesize contentsDictionary = _contentsDictionary;
+@synthesize popContentsDictionary = _popContentsDictionary;
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
@@ -50,6 +51,11 @@
     if(_contentsDictionary == nil)
     {
         _contentsDictionary = [[NSMutableDictionary alloc] init];
+    }
+    
+    if(_popContentsDictionary == nil)
+    {
+        _popContentsDictionary = [[NSMutableDictionary alloc] init];
     }
     
     if([@"init" isEqualToString:call.method])
@@ -107,6 +113,10 @@
     else if([@"getRewardPlusUserSetting" isEqualToString:call.method])
     {
         [self callGetRewardPlusUserSetting:call result:result];
+    }
+    else if([@"openPopContents" isEqualToString:call.method])
+    {
+        [self callOpenPopContents:call result:result];
     }
     else
     {
@@ -396,11 +406,44 @@
     [AdPopcornSSP getRewardPlusUserSetting:appKey];
 }
 
+- (void)callOpenPopContents:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    NSString* placementId = (NSString*)call.arguments[@"placementId"];
+    if(appKey == nil || appKey.length == 0) {
+        result([FlutterError errorWithCode:@"no_app_key" message:@"a nil or empty AdPopcornSSP appKey was provided" details:nil]);
+        return;
+    }
+    if (placementId == nil || placementId.length == 0) {
+        result([FlutterError errorWithCode:@"no_placement_id" message:@"a nil or empty AdPopcornSSP placementId was provided" details:nil]);
+        return;
+    }
+    
+    AdPopcornSSPPopContentsAd *popContentsAd;
+    if([_popContentsDictionary objectForKey:placementId])
+    {
+        NSLog(@"callOpenPopContents already exist contents ad placementId : %@", placementId);
+        popContentsAd = [_popContentsDictionary objectForKey:placementId];
+    }
+    else
+    {
+        NSLog(@"callOpenPopContents placementId : %@", placementId);
+        popContentsAd = [[AdPopcornSSPPopContentsAd alloc] initWithAppKey:appKey popContentsPlacementId:placementId viewController:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
+        [_popContentsDictionary setObject:popContentsAd forKey:placementId];
+    }
+    popContentsAd.delegate = self;
+    [popContentsAd openPopContents];
+}
+
 #pragma mark APSSPSDKInitializeDelegate
 - (void)AdPopcornSSPSDKDidInitialize
 {
     NSLog(@"AdPopcornSSPPlugin AdPopcornSSPSDKDidInitialize");
     [_channel invokeMethod:@"AdPopcornSSPSDKDidInitialize" arguments:@{}];
+}
+
+- (void)APSSPRewardPlusSettingPageClosed
+{
+    
 }
 
 #pragma mark APSSPRewardPlusSettingDelegate
@@ -644,5 +687,24 @@
     [_channel invokeMethod:@"ContentsAdCompleted" 
                  arguments:@{@"reward":@(reward),
                              @"rewardKey":rewardKey}];
+}
+
+#pragma mark APSSPPopContentsAdDelegate
+- (void)APSSPPopContentsAdOpenSuccess:(AdPopcornSSPPopContentsAd *)contentsAd
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPPopContentsAdOpenSuccess");
+    [_channel invokeMethod:@"PopContentsAdOpenSuccess" arguments:@{}];
+}
+
+- (void)APSSPPopContentsAdOpenFail:(AdPopcornSSPPopContentsAd *)contentsAd error:(AdPopcornSSPError *)error
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPPopContentsAdOpenFail");
+    [_channel invokeMethod:@"PopContentsAdOpenFail" arguments:@{}];
+}
+
+- (void)APSSPPopContentsAdClosed:(AdPopcornSSPPopContentsAd *)contentsAd
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPPopContentsAdClosed");
+    [_channel invokeMethod:@"PopContentsAdClosed" arguments:@{}];
 }
 @end

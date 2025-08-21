@@ -48,6 +48,7 @@
   if (self = [super init]) {
       NSString* appKey = (NSString*)args[@"appKey"];
       NSString* placementId = (NSString*)args[@"placementId"];
+      
       _nativeView = [[AdPopcornSSPReactNativeAd alloc] initWithFrame:frame appKey:appKey placementId:placementId viewController:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
       _channel = [FlutterMethodChannel
                   methodChannelWithName:[@"adpopcornssp/" stringByAppendingString:placementId]

@@ -9,4 +9,5 @@
 @property (retain, nonatomic) NSMutableDictionary *interstitialVideoDictionary;
 @property (retain, nonatomic) NSMutableDictionary *rewardVideoDictionary;
 @property (retain, nonatomic) NSMutableDictionary *contentsDictionary;
+@property (retain, nonatomic) NSMutableDictionary *popContentsDictionary;
 @end

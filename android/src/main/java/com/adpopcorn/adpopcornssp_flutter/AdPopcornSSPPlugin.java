@@ -14,6 +14,8 @@ import com.igaworks.ssp.part.contents.AdPopcornSSPContentsAd;
 import com.igaworks.ssp.part.contents.listener.IContentsAdEventCallbackListener;
 import com.igaworks.ssp.part.interstitial.AdPopcornSSPInterstitialAd;
 import com.igaworks.ssp.part.interstitial.listener.IInterstitialEventCallbackListener;
+import com.igaworks.ssp.part.popcontents.AdPopcornSSPPopContentsAd;
+import com.igaworks.ssp.part.popcontents.listener.IPopContentsAdEventCallbackListener;
 import com.igaworks.ssp.part.video.AdPopcornSSPInterstitialVideoAd;
 import com.igaworks.ssp.part.video.AdPopcornSSPRewardVideoAd;
 import com.igaworks.ssp.part.video.listener.IInterstitialVideoAdEventCallbackListener;
@@ -45,6 +47,7 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
   private Map<String, AdPopcornSSPInterstitialVideoAd> interstitialVideoAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPRewardVideoAd> rewardVideoAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPContentsAd> contentsAdMap = new HashMap<>();
+  private Map<String, AdPopcornSSPPopContentsAd> popContentsAdMap = new HashMap<>();
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     this.flutterPluginBinding = flutterPluginBinding;
@@ -91,6 +94,8 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       rewardVideoAdMap = new HashMap<>();
     if(contentsAdMap == null)
       contentsAdMap = new HashMap<>();
+    if(popContentsAdMap == null)
+      popContentsAdMap = new HashMap<>();
   }
 
   @Override
@@ -124,6 +129,8 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         callOpenRewardPlusSetting(call, result);
       } else if (call.method.equals("getRewardPlusUserSetting")) {
         callGetRewardPlusUserSetting(call, result);
+      } else if (call.method.equals("openPopContents")) {
+        callOpenPopContents(call, result);
       } else {
         result.notImplemented();
       }
@@ -518,6 +525,44 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
           });
         }
       });
+    }catch (Exception e){}
+  }
+
+  private void callOpenPopContents(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPPopContentsAd popContentsAd;
+      if(popContentsAdMap.containsKey(placementId))
+      {
+        popContentsAd = popContentsAdMap.get(placementId);
+      }
+      else
+      {
+        popContentsAd = new AdPopcornSSPPopContentsAd(context);
+        popContentsAdMap.put(placementId, popContentsAd);
+      }
+      popContentsAd.setPlacementId(placementId);
+      popContentsAd.setPopContentsAdEventCallbackListener(new IPopContentsAdEventCallbackListener() {
+        @Override
+        public void OnPopContentsAdOpened() {
+          if(channel != null)
+            channel.invokeMethod("PopContentsAdOpenSuccess", argumentsMap());
+        }
+
+        @Override
+        public void OnPopContentsAdOpenFailed(SSPErrorCode sspErrorCode) {
+          if(channel != null)
+            channel.invokeMethod("PopContentsAdOpenFail", argumentsMap());
+        }
+
+        @Override
+        public void OnPopContentsAdClosed() {
+          if(channel != null)
+            channel.invokeMethod("PopContentsAdClosed", argumentsMap());
+        }
+      });
+      popContentsAd.openPopContents();
     }catch (Exception e){}
   }
 

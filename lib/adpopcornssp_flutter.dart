@@ -50,6 +50,12 @@ typedef void ContentsAdCompleted(int reward, String rewardKey);
 
 typedef void RewardPlusSettingInfo(String connectedId, int dailyUserLimit, int dailyUserCount);
 
+typedef void PopContentsAdOpenSuccess();
+
+typedef void PopContentsAdOpenFail();
+
+typedef void PopContentsAdClosed();
+
 class AdPopcornSSP {
   static const MethodChannel _channel = const MethodChannel('adpopcornssp');
 
@@ -100,6 +106,12 @@ class AdPopcornSSP {
   static ContentsAdCompleted? contentsAdCompletedListener;
   
   static RewardPlusSettingInfo? rewardPlusSettingInfoListener;
+  
+  static PopContentsAdOpenSuccess? popContentsAdOpenSuccessListener;
+  
+  static PopContentsAdOpenFail? popContentsAdOpenFailListener;
+    
+  static PopContentsAdClosed? popContentsAdClosedListener;
   
   static void init(String appKey) {
     //register callback method handler
@@ -212,6 +224,13 @@ class AdPopcornSSP {
   static void getRewardPlusUserSetting(String appKey) {
     _channel.invokeMethod('getRewardPlusUserSetting', <String, dynamic>{
       'appKey': appKey,
+    });
+  }
+  
+  static void openPopContents(String appKey, String placementId) {
+    _channel.invokeMethod('openPopContents', <String, dynamic>{
+      'appKey': appKey,
+      'placementId': placementId,
     });
   }
 
@@ -347,6 +366,18 @@ class AdPopcornSSP {
         final int dailyUserCount = arguments['dailyUserCount'];
         if (rewardPlusSettingInfoListener != null) {
               rewardPlusSettingInfoListener!(connectedId, dailyUserLimit, dailyUserCount);
+        }
+      } else if (method == 'PopContentsAdOpenSuccess') {
+        if (popContentsAdOpenSuccessListener != null) {
+              popContentsAdOpenSuccessListener!();
+        }
+      } else if (method == 'PopContentsAdOpenFail') {
+        if (popContentsAdOpenFailListener != null) {
+              popContentsAdOpenFailListener!();
+        }
+      } else if (method == 'PopContentsAdClosed') {
+        if (popContentsAdClosedListener != null) {
+              popContentsAdClosedListener!();
         }
       }
     }
