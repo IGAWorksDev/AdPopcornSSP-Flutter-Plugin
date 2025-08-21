@@ -1,7 +1,7 @@
 PODS:
-  - AdPopcornSSP (2.9.0)
-  - adpopcornssp_flutter (1.0.7):
-    - AdPopcornSSP (= 2.9.0)
+  - AdPopcornSSP (2.9.4)
+  - adpopcornssp_flutter (1.0.9):
+    - AdPopcornSSP (= 2.9.4)
     - Flutter
   - Flutter (1.0.0)
 
@@ -20,8 +20,8 @@ EXTERNAL SOURCES:
     :path: Flutter
 
 SPEC CHECKSUMS:
-  AdPopcornSSP: 1a762cda1e43197f972f2d878b115bfab9e2bfff
-  adpopcornssp_flutter: 2c50522928b309978382b4df1a3129d594a39c78
+  AdPopcornSSP: 4986651b4a444810313a846299b90aca3044e3a1
+  adpopcornssp_flutter: b301dc8951ebf745a401f948aca3d50714462363
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
 
 PODFILE CHECKSUM: 663715e941f9adb426e33bf9376914006f9ea95b
