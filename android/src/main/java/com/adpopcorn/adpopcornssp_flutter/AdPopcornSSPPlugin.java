@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import com.igaworks.ssp.AdPopcornSSP;
 import com.igaworks.ssp.SSPErrorCode;
 import com.igaworks.ssp.SdkInitListener;
+import com.igaworks.ssp.common.model.RewardAdPlusPlacementStatusModel;
 import com.igaworks.ssp.part.contents.AdPopcornSSPContentsAd;
 import com.igaworks.ssp.part.contents.listener.IContentsAdEventCallbackListener;
 import com.igaworks.ssp.part.interstitial.AdPopcornSSPInterstitialAd;
@@ -21,8 +22,15 @@ import com.igaworks.ssp.part.video.AdPopcornSSPRewardVideoAd;
 import com.igaworks.ssp.part.video.listener.IInterstitialVideoAdEventCallbackListener;
 import com.igaworks.ssp.part.video.listener.IRewardPlusSettingEventCallbackListener;
 import com.igaworks.ssp.part.video.listener.IRewardVideoAdEventCallbackListener;
+import com.igaworks.ssp.rewardplus.AdPopcornSSPRewardAdPlus;
+import com.igaworks.ssp.rewardplus.listener.IRewardAdEventCallbackListener;
+import com.igaworks.ssp.rewardplus.listener.IRewardAdPlusUserStatusCallbackListener;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -131,7 +139,15 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         callGetRewardPlusUserSetting(call, result);
       } else if (call.method.equals("openPopContents")) {
         callOpenPopContents(call, result);
-      } else {
+      } else if (call.method.equals("openRewardAdPlusPage")) {
+        callOpenRewardAdPlusPage(call, result);
+      } else if (call.method.equals("getRewardAdPlusUserMediaStatus")) {
+        callGetRewardAdPlusUserMediaStatus(call, result);
+      } else if (call.method.equals("getRewardAdPlusUserPlacementStatus")) {
+        callGetRewardAdPlusUserPlacementStatus(call, result);
+      } else if (call.method.equals("setRewardAdPlusEventListener")) {
+        callSetRewardAdPlusEventListener(call, result);
+      }  else {
         result.notImplemented();
       }
     }catch (Exception e){}
@@ -563,6 +579,113 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         }
       });
       popContentsAd.openPopContents();
+    }catch (Exception e){}
+  }
+
+  private void callOpenRewardAdPlusPage(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      String version = "";
+      if(call.hasArgument("version")) {
+        version = call.argument("version");
+        if (version == null || version.isEmpty())
+          version = "1.5";
+      }
+      AdPopcornSSPRewardAdPlus.openRewardAdPlusPage(context, version);
+    }catch (Exception e){}
+  }
+
+  private void callGetRewardAdPlusUserMediaStatus(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      AdPopcornSSPRewardAdPlus.getRewardAdPlusUserStatus(context, null, new IRewardAdPlusUserStatusCallbackListener()
+      {
+        @Override
+        public void OnRewardAdPlusUserMediaStatus(boolean result, int totalBoxCount, List<RewardAdPlusPlacementStatusModel> placementStatusList) {
+          if(channel != null) {
+            try{
+              JSONArray returnArray = new JSONArray();
+              for(RewardAdPlusPlacementStatusModel placementStatusModel : placementStatusList){
+                JSONObject object = new JSONObject();
+                object.put("placementId", placementStatusModel.getPlacementId());
+                object.put("dailyUserLimit", placementStatusModel.getDailyUserLimit());
+                object.put("dailyUserCount", placementStatusModel.getDailyUserCount());
+                returnArray.put(object);
+              }
+              channel.invokeMethod("APSSPRewardAdPlusUserMediaStatus",
+                      argumentsMap("result", result, "totalBoxCount", totalBoxCount,
+                              "placementStatusList", returnArray.toString()));
+            }catch (Exception e){}
+          }
+        }
+
+        @Override
+        public void OnRewardAdPlusUserPlacementStatus(boolean result, String placementId, int dailyUserLimit, int dailyUserCount) {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardAdPlusUserPlacementStatus",
+                    argumentsMap("result", result, "placementId", placementId, "dailyUserLimit", dailyUserLimit,
+                            "dailyUserCount", dailyUserCount));
+        }
+      });
+    }catch (Exception e){}
+  }
+
+  private void callGetRewardAdPlusUserPlacementStatus(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      String placementId = "";
+      if(call.hasArgument("placementId")){
+        placementId = call.argument("placementId");
+      }
+      AdPopcornSSPRewardAdPlus.getRewardAdPlusUserStatus(context, placementId, new IRewardAdPlusUserStatusCallbackListener()
+      {
+        @Override
+        public void OnRewardAdPlusUserMediaStatus(boolean result, int totalBoxCount, List<RewardAdPlusPlacementStatusModel> placementStatusList) {
+          if(channel != null) {
+            try{
+              JSONArray returnArray = new JSONArray();
+              for(RewardAdPlusPlacementStatusModel placementStatusModel : placementStatusList){
+                JSONObject object = new JSONObject();
+                object.put("placementId", placementStatusModel.getPlacementId());
+                object.put("dailyUserLimit", placementStatusModel.getDailyUserLimit());
+                object.put("dailyUserCount", placementStatusModel.getDailyUserCount());
+                returnArray.put(object);
+              }
+              channel.invokeMethod("APSSPRewardAdPlusUserMediaStatus",
+                      argumentsMap("result", result, "totalBoxCount", totalBoxCount,
+                              "placementStatusList", returnArray.toString()));
+            }catch (Exception e){}
+          }
+        }
+
+        @Override
+        public void OnRewardAdPlusUserPlacementStatus(boolean result, String placementId, int dailyUserLimit, int dailyUserCount) {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardAdPlusUserPlacementStatus",
+                    argumentsMap("result", result, "placementId", placementId, "dailyUserLimit", dailyUserLimit,
+                            "dailyUserCount", dailyUserCount));
+        }
+      });
+    }catch (Exception e){}
+  }
+
+  private void callSetRewardAdPlusEventListener(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      AdPopcornSSPRewardAdPlus.setRewardAdPlusEventListener(new IRewardAdEventCallbackListener() {
+        @Override
+        public void OnClosedRewardAdPlusPage() {
+          if(channel != null)
+            channel.invokeMethod("APSSPClosedRewardAdPlusPage",argumentsMap());
+        }
+
+        @Override
+        public void OnEventResult(int resultCode, String resultMessage) {
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardAdPlusEventResult",
+                    argumentsMap("resultCode", resultCode, "resultMessage", resultMessage));
+        }
+      });
     }catch (Exception e){}
   }
 

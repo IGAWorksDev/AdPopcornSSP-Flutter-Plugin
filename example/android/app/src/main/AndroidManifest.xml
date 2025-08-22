@@ -27,7 +27,9 @@
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
-        <meta-data
+       <meta-data
+           android:name="adpopcorn_ssp_app_key" android:value="your_app_key"></meta-data>
+       <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>

@@ -2,7 +2,7 @@
 #import "AdPopcornSSPPlugin.h"
 
 @interface AdPopcornSSPPlugin() <APSSPSDKInitializeDelegate, APSSPInterstitialAdDelegate,
-APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate, APSSPPopContentsAdDelegate>
+APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate, APSSPPopContentsAdDelegate, APSSPRewardAdPlusEventDelegate>
 @end
 
 @implementation AdPopcornSSPPlugin
@@ -117,6 +117,22 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
     else if([@"openPopContents" isEqualToString:call.method])
     {
         [self callOpenPopContents:call result:result];
+    }
+    else if([@"openRewardAdPlusPage" isEqualToString:call.method])
+    {
+        [self callOpenRewardAdPlusPage:call result:result];
+    }
+    else if([@"getRewardAdPlusUserMediaStatus" isEqualToString:call.method])
+    {
+        [self callGetRewardAdPlusUserMediaStatus:call result:result];
+    }
+    else if([@"getRewardAdPlusUserPlacementStatus" isEqualToString:call.method])
+    {
+        [self callGetRewardAdPlusUserPlacementStatus:call result:result];
+    }
+    else if([@"setRewardAdPlusEventListener" isEqualToString:call.method])
+    {
+        [self callSetRewardAdPlusEventListener:call result:result];
     }
     else
     {
@@ -434,6 +450,28 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
     [popContentsAd openPopContents];
 }
 
+- (void)callOpenRewardAdPlusPage:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    [AdPopcornSSPRewardAdPlus openRewardAdPlusViewController:appKey viewCotroller:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
+}
+
+- (void)callGetRewardAdPlusUserMediaStatus:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    [AdPopcornSSPRewardAdPlus sharedInstance].delegate = self;
+    [AdPopcornSSPRewardAdPlus getRewardAdPlusUserMediaStatus:appKey];
+}
+
+- (void)callGetRewardAdPlusUserPlacementStatus:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    NSString* placementId = (NSString*)call.arguments[@"placementId"];
+    [AdPopcornSSPRewardAdPlus sharedInstance].delegate = self;
+    [AdPopcornSSPRewardAdPlus getRewardAdPlusUserPlacementStatus:appKey placementId:placementId];
+}
+
+- (void)callSetRewardAdPlusEventListener:(FlutterMethodCall*)call result:(FlutterResult)result {
+    [AdPopcornSSPRewardAdPlus sharedInstance].delegate = self;
+}
+
 #pragma mark APSSPSDKInitializeDelegate
 - (void)AdPopcornSSPSDKDidInitialize
 {
@@ -706,5 +744,61 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
 {
     NSLog(@"AdPopcornSSPPlugin APSSPPopContentsAdClosed");
     [_channel invokeMethod:@"PopContentsAdClosed" arguments:@{}];
+}
+
+#pragma mark APSSPRewardAdPlusEventDelegate
+- (void)rewardAdPlusUserMediaStatusWithResult:(BOOL)result
+                                   totalBoxCount:(NSInteger)totalBoxCount
+                           placementStatusList:(NSArray*)placementStatusList
+{
+    NSLog(@"AdPopcornSSPPlugin rewardAdPlusUserMediaStatusWithResult");
+    NSString *jsonString = @"";
+    NSMutableArray *returnArray = [NSMutableArray array];
+    for (APSSPRewardAdPlusStatusModel *placementStatusModel in placementStatusList)
+    {
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        dictionary[@"placementId"] = placementStatusModel.placementId;
+        dictionary[@"dailyUserLimit"] = @(placementStatusModel.limit);
+        dictionary[@"dailyUserCount"] = @(placementStatusModel.current);
+        [returnArray addObject:dictionary];
+        
+        NSError *error = nil;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:returnArray options:0 error:&error];
+        
+        if (!error) {
+            jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        }
+    }
+    [_channel invokeMethod:@"APSSPRewardAdPlusUserMediaStatus"
+                     arguments:@{@"result":@(result),
+                                 @"totalBoxCount":@(totalBoxCount),
+                                 @"placementStatusList":jsonString}];
+}
+
+- (void)rewardAdPlusUserPlacementStatusWithResult:(BOOL)result
+                                        placementId:(NSString *)placementId
+                                   dailyUserLimit:(NSInteger)dailyUserLimit
+                                   dailyUserCount:(NSInteger)dailyUserCount
+{
+    NSLog(@"AdPopcornSSPPlugin rewardAdPlusUserPlacementStatusWithResult");
+    [_channel invokeMethod:@"APSSPRewardAdPlusUserPlacementStatus"
+                     arguments:@{@"result":@(result),
+                                 @"placementId":placementId,
+                                 @"dailyUserLimit":@(dailyUserLimit),
+                                 @"dailyUserCount":@(dailyUserCount)}];
+}
+
+- (void) closedRewardAdPlusPage
+{
+    NSLog(@"AdPopcornSSPPlugin closedRewardAdPlusPage");
+    [_channel invokeMethod:@"APSSPClosedRewardAdPlusPage" arguments:@{}];
+}
+
+- (void) eventResult:(int)resultCode resultMessage: (NSString*)message
+{
+    NSLog(@"AdPopcornSSPPlugin eventResult");
+    [_channel invokeMethod:@"APSSPRewardAdPlusEventResult"
+                     arguments:@{@"resultCode":@(resultCode),
+                                 @"resultMessage":message}];
 }
 @end

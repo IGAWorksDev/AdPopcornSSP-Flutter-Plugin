@@ -56,6 +56,14 @@ typedef void PopContentsAdOpenFail();
 
 typedef void PopContentsAdClosed();
 
+typedef void RewardAdPlusUserMediaStatus(bool result, int totalBoxCount, String placementStatusList);
+
+typedef void RewardAdPlusUserPlacementStatus(bool result, String placementId, int dailyUserLimit, int dailyUserCount);
+
+typedef void RewardAdPlusPageClosed();
+
+typedef void RewardAdPlusEventResult(int resultCode, String resultMessage);
+
 class AdPopcornSSP {
   static const MethodChannel _channel = const MethodChannel('adpopcornssp');
 
@@ -112,6 +120,14 @@ class AdPopcornSSP {
   static PopContentsAdOpenFail? popContentsAdOpenFailListener;
     
   static PopContentsAdClosed? popContentsAdClosedListener;
+  
+  static RewardAdPlusUserMediaStatus? rewardAdPlusUserMediaStatusListener;
+  
+  static RewardAdPlusUserPlacementStatus? rewardAdPlusUserPlacementStatusListener;
+  
+  static RewardAdPlusPageClosed? rewardAdPlusPageClosedListener;
+    
+  static RewardAdPlusEventResult? rewardAdPlusEventResultListener;
   
   static void init(String appKey) {
     //register callback method handler
@@ -232,6 +248,33 @@ class AdPopcornSSP {
       'appKey': appKey,
       'placementId': placementId,
     });
+  }
+  
+  static void openRewardAdPlusPage(String appKey, String version) {
+    _channel.setMethodCallHandler(_handleMethod);
+    _channel.invokeMethod('openRewardAdPlusPage', <String, dynamic>{
+      'appKey': appKey,
+      'version': version,
+    });
+  }
+  
+  static void getRewardAdPlusUserMediaStatus(String appKey) {
+    _channel.setMethodCallHandler(_handleMethod);
+    _channel.invokeMethod('getRewardAdPlusUserMediaStatus', <String, dynamic>{
+      'appKey': appKey,
+    });
+  }
+  
+  static void getRewardAdPlusUserPlacementStatus(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
+    _channel.invokeMethod('getRewardAdPlusUserPlacementStatus', <String, dynamic>{
+      'appKey': appKey,
+      'placementId': placementId,
+    });
+  }
+  
+  static void setRewardAdPlusEventListener() {
+    _channel.invokeMethod('setRewardAdPlusEventListener', <String, dynamic>{});
   }
 
   static Future<dynamic> _handleMethod(MethodCall call) {
@@ -378,6 +421,31 @@ class AdPopcornSSP {
       } else if (method == 'PopContentsAdClosed') {
         if (popContentsAdClosedListener != null) {
               popContentsAdClosedListener!();
+        }
+      } else if (method == 'APSSPRewardAdPlusUserMediaStatus') {
+        final bool result = arguments['result'];
+        final int totalBoxCount = arguments['totalBoxCount'];
+        final String placementStatusList = arguments['placementStatusList'];
+        if (rewardAdPlusUserMediaStatusListener != null) {
+            rewardAdPlusUserMediaStatusListener!(result, totalBoxCount, placementStatusList);
+        }
+      } else if (method == 'APSSPRewardAdPlusUserPlacementStatus') {
+        final bool result = arguments['result'];
+        final String placementId = arguments['placementId'];
+        final int dailyUserLimit = arguments['dailyUserLimit'];
+        final int dailyUserCount = arguments['dailyUserCount'];
+        if (rewardAdPlusUserPlacementStatusListener != null) {
+            rewardAdPlusUserPlacementStatusListener!(result, placementId, dailyUserLimit, dailyUserCount);
+        }
+      } else if (method == 'APSSPClosedRewardAdPlusPage') {
+        if (rewardAdPlusPageClosedListener != null) {
+            rewardAdPlusPageClosedListener!();
+        }
+      } else if (method == 'APSSPRewardAdPlusEventResult') {
+        final int resultCode = arguments['resultCode'];
+        final String resultMessage = arguments['resultMessage'];
+        if (rewardAdPlusEventResultListener != null) {
+            rewardAdPlusEventResultListener!(resultCode, resultMessage);
         }
       }
     }
