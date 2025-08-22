@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'adpopcornssp_flutter'
-  s.version          = '1.0.9'
+  s.version          = '1.0.10'
   s.summary          = 'AdPopcornSSP plugin project.'
   s.description      = <<-DESC
 A new Flutter plugin project.
