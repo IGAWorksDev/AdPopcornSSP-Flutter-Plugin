@@ -13,8 +13,12 @@ import com.igaworks.ssp.SdkInitListener;
 import com.igaworks.ssp.common.model.RewardAdPlusPlacementStatusModel;
 import com.igaworks.ssp.part.contents.AdPopcornSSPContentsAd;
 import com.igaworks.ssp.part.contents.listener.IContentsAdEventCallbackListener;
+import com.igaworks.ssp.part.hybrid.AdPopcornSSPJsBridge;
+import com.igaworks.ssp.part.hybrid.HybridEventCallbackListener;
 import com.igaworks.ssp.part.interstitial.AdPopcornSSPInterstitialAd;
 import com.igaworks.ssp.part.interstitial.listener.IInterstitialEventCallbackListener;
+import com.igaworks.ssp.part.mix.AdPopcornSSPVideoMixAd;
+import com.igaworks.ssp.part.mix.listener.IVideoMixAdEventCallbackListener;
 import com.igaworks.ssp.part.popcontents.AdPopcornSSPPopContentsAd;
 import com.igaworks.ssp.part.popcontents.listener.IPopContentsAdEventCallbackListener;
 import com.igaworks.ssp.part.video.AdPopcornSSPInterstitialVideoAd;
@@ -56,8 +60,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
   private Map<String, AdPopcornSSPRewardVideoAd> rewardVideoAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPContentsAd> contentsAdMap = new HashMap<>();
   private Map<String, AdPopcornSSPPopContentsAd> popContentsAdMap = new HashMap<>();
+  private Map<String, AdPopcornSSPVideoMixAd> videoMixAdMap = new HashMap<>();
+
   @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     this.flutterPluginBinding = flutterPluginBinding;
     this.context = flutterPluginBinding.getApplicationContext();
     setup(this, flutterPluginBinding.getBinaryMessenger());
@@ -104,6 +110,8 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       contentsAdMap = new HashMap<>();
     if(popContentsAdMap == null)
       popContentsAdMap = new HashMap<>();
+    if(videoMixAdMap == null)
+      videoMixAdMap = new HashMap<>();
   }
 
   @Override
@@ -131,6 +139,10 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
         callLoadRewardVideo(call, result);
       } else if (call.method.equals("showRewardVideo")) {
         callShowRewardVideo(call, result);
+      } else if (call.method.equals("loadVideoMix")) {
+        callLoadVideoMix(call, result);
+      } else if (call.method.equals("showVideoMix")) {
+        callShowVideoMix(call, result);
       } else if (call.method.equals("openContents")) {
         callOpenContents(call, result);
       } else if (call.method.equals("openRewardPlusSetting")) {
@@ -403,7 +415,8 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
 
         @Override
         public void OnRewardVideoAdLoadFailed(SSPErrorCode sspErrorCode) {
-          channel.invokeMethod("APSSPRewardVideoAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+          if(channel != null)
+            channel.invokeMethod("APSSPRewardVideoAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
         }
 
         @Override
@@ -469,6 +482,97 @@ public class AdPopcornSSPPlugin implements FlutterPlugin, ActivityAware, MethodC
       else {
         if(channel != null)
           channel.invokeMethod("APSSPRewardVideoAdShowFail", argumentsMap("placementId", placementId));
+      }
+    }catch (Exception e){}
+  }
+
+  private void callLoadVideoMix(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPVideoMixAd videoMixAd;
+      if(videoMixAdMap.containsKey(placementId))
+      {
+        videoMixAd = videoMixAdMap.get(placementId);
+      }
+      else
+      {
+        if(activityContext != null)
+          videoMixAd = new AdPopcornSSPVideoMixAd(activityContext);
+        else
+          videoMixAd = new AdPopcornSSPVideoMixAd(context);
+        videoMixAdMap.put(placementId, videoMixAd);
+      }
+      videoMixAd.setPlacementId(placementId);
+      videoMixAd.setVideoMixAdEventCallbackListener(new IVideoMixAdEventCallbackListener() {
+        @Override
+        public void OnVideoMixAdLoaded() {
+          if(channel != null)
+            channel.invokeMethod("APSSPVideoMixAdLoadSuccess", argumentsMap("placementId", placementId));
+        }
+
+        @Override
+        public void OnVideoMixAdLoadFailed(SSPErrorCode sspErrorCode) {
+          if(channel != null)
+            channel.invokeMethod("APSSPVideoMixAdLoadFail", argumentsMap("placementId", placementId, "errorCode", sspErrorCode.getErrorCode()));
+        }
+
+        @Override
+        public void OnVideoMixAdOpened() {
+          if(channel != null)
+            channel.invokeMethod("APSSPVideoMixAdShowSuccess", argumentsMap("placementId", placementId));
+        }
+
+        @Override
+        public void OnVideoMixAdOpenFailed() {
+          if(channel != null)
+            channel.invokeMethod("APSSPVideoMixAdShowFail", argumentsMap("placementId", placementId));
+        }
+
+        @Override
+        public void OnVideoMixAdClosed(int campaignType) {
+          if(channel != null)
+            channel.invokeMethod("APSSPVideoMixAdClosed", argumentsMap("placementId", placementId, "campaignType", campaignType));
+        }
+
+        @Override
+        public void OnVideoMixPlayCompleted(int adNetworkNo, boolean completed) {
+          if(channel != null)
+            channel.invokeMethod("APSSPVideoMixAdPlayCompleted", argumentsMap("placementId", placementId, "adNetworkNo", adNetworkNo, "completed", completed));
+        }
+
+        @Override
+        public void OnVideoMixAdClicked() {
+        }
+      });
+      videoMixAd.loadAd();
+    }catch (Exception e){}
+  }
+
+  private void callShowVideoMix(@NonNull MethodCall call, @NonNull Result result)
+  {
+    try{
+      final String placementId = call.argument("placementId");
+      AdPopcornSSPVideoMixAd videoMixAd;
+      if(videoMixAdMap.containsKey(placementId))
+      {
+        videoMixAd = videoMixAdMap.get(placementId);
+        if(activityContext != null && activityContext instanceof Activity)
+          videoMixAd.setCurrentActivity((Activity)activityContext);
+      }
+      else
+      {
+        if(activityContext != null)
+          videoMixAd = new AdPopcornSSPVideoMixAd(activityContext);
+        else
+          videoMixAd = new AdPopcornSSPVideoMixAd(context);
+      }
+      if(videoMixAd.isReady()) {
+        videoMixAd.showAd();
+      }
+      else {
+        if(channel != null)
+          channel.invokeMethod("APSSPVideoMixAdShowFail", argumentsMap("placementId", placementId));
       }
     }catch (Exception e){}
   }

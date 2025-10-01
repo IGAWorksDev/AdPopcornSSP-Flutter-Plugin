@@ -46,6 +46,12 @@ class _MyAppState extends State<MyApp> {
       AdPopcornSSP.rewardVideoAdLoadSuccessListener = (placementId) {
         // AdPopcornSSP.showRewardVideo('663451319', placementId);
       };
+      
+      // 비디오 믹스 연동
+      AdPopcornSSP.loadVideoMix('663451319', 'REWARD_VIDEO');
+      AdPopcornSSP.videoMixAdLoadSuccessListener = (placementId) {
+        AdPopcornSSP.showVideoMix('663451319', placementId);
+      };
 
       // 배너, 네이티브 이벤트 채널 연동
       androidBannerChannel.setMethodCallHandler(_eventHandleMethod);
@@ -69,6 +75,12 @@ class _MyAppState extends State<MyApp> {
       AdPopcornSSP.loadRewardVideo('397261446', 'iOS_REWARD_VIDEO');
       AdPopcornSSP.rewardVideoAdLoadSuccessListener = (placementId) {
         //AdPopcornSSP.showRewardVideo('397261446', placementId);
+      };
+      
+      // 비디오 믹스 연동
+      AdPopcornSSP.loadVideoMix('397261446', 'iOS_REWARD_VIDEO');
+      AdPopcornSSP.videoMixAdLoadSuccessListener = (placementId) {
+        AdPopcornSSP.showVideoMix('397261446', placementId);
       };
 
       // 배너, 네이티브 이벤트 채널 연동
@@ -198,5 +210,6 @@ class _MyAppState extends State<MyApp> {
       return Future<dynamic>.value(null);
     }
 }
+
 
 

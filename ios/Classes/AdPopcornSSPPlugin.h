@@ -10,4 +10,5 @@
 @property (retain, nonatomic) NSMutableDictionary *rewardVideoDictionary;
 @property (retain, nonatomic) NSMutableDictionary *contentsDictionary;
 @property (retain, nonatomic) NSMutableDictionary *popContentsDictionary;
+@property (retain, nonatomic) NSMutableDictionary *videoMixDictionary;
 @end

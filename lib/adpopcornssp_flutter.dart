@@ -64,6 +64,20 @@ typedef void RewardAdPlusPageClosed();
 
 typedef void RewardAdPlusEventResult(int resultCode, String resultMessage);
 
+typedef void VideoMixAdLoadSuccess(String placementId);
+
+typedef void VideoMixAdLoadFail(String placementId, int errorCode);
+
+typedef void VideoMixAdShowSuccess(String placementId);
+
+typedef void VideoMixAdShowFail(String placementId);
+
+typedef void VideoMixAdClosed(String placementId, int campaignType);
+
+typedef void VideoMixAdCompleted(String placementId);
+
+typedef void VideoMixAdClicked(String placementId);
+
 class AdPopcornSSP {
   static const MethodChannel _channel = const MethodChannel('adpopcornssp');
 
@@ -104,6 +118,20 @@ class AdPopcornSSP {
   static RewardVideoAdCompleted? rewardVideoAdCompletedListener;
   
   static RewardPlusCompleted? rewardPlusCompletedListener;
+
+  static VideoMixAdLoadSuccess? videoMixAdLoadSuccessListener;
+
+  static VideoMixAdLoadFail? videoMixAdLoadFailListener;
+
+  static VideoMixAdShowSuccess? videoMixAdShowSuccessListener;
+
+  static VideoMixAdShowFail? videoMixAdShowFailListener;
+
+  static VideoMixAdClosed? videoMixAdClosedListener;
+
+  static VideoMixAdCompleted? videoMixAdCompletedListener;
+
+  static VideoMixAdClicked? videoMixAdClickedListener;
   
   static ContentsAdOpenSuccess? contentsAdOpenSuccessListener;
   
@@ -183,6 +211,7 @@ class AdPopcornSSP {
   }
   
   static void loadInterstitial(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('loadInterstitial', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -190,6 +219,7 @@ class AdPopcornSSP {
   }
   
   static void showInterstitial(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('showInterstitial', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -197,6 +227,7 @@ class AdPopcornSSP {
   }
   
   static void loadInterstitialVideo(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('loadInterstitialVideo', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -204,6 +235,7 @@ class AdPopcornSSP {
   }
   
   static void showInterstitialVideo(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('showInterstitialVideo', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -211,6 +243,7 @@ class AdPopcornSSP {
   }
 
   static void loadRewardVideo(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('loadRewardVideo', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -218,13 +251,31 @@ class AdPopcornSSP {
   }
   
   static void showRewardVideo(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('showRewardVideo', <String, dynamic>{
+      'appKey': appKey,
+      'placementId': placementId,
+    });
+  }
+
+  static void loadVideoMix(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
+    _channel.invokeMethod('loadVideoMix', <String, dynamic>{
+      'appKey': appKey,
+      'placementId': placementId,
+    });
+  }
+
+  static void showVideoMix(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
+    _channel.invokeMethod('showVideoMix', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
     });
   }
   
   static void openContents(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('openContents', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -232,18 +283,21 @@ class AdPopcornSSP {
   }
   
   static void openRewardPlusSetting(String appKey) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('openRewardPlusSetting', <String, dynamic>{
       'appKey': appKey,
     });
   }
   
   static void getRewardPlusUserSetting(String appKey) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('getRewardPlusUserSetting', <String, dynamic>{
       'appKey': appKey,
     });
   }
   
   static void openPopContents(String appKey, String placementId) {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('openPopContents', <String, dynamic>{
       'appKey': appKey,
       'placementId': placementId,
@@ -274,11 +328,12 @@ class AdPopcornSSP {
   }
   
   static void setRewardAdPlusEventListener() {
+    _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod('setRewardAdPlusEventListener', <String, dynamic>{});
   }
 
   static Future<dynamic> _handleMethod(MethodCall call) {
-    print('adpopcornssp.dart _handleMethod: ${call.method}, ${call.arguments}');
+    print('_handleMethod: ${call.method}, ${call.arguments}');
     final Map<dynamic, dynamic> arguments = call.arguments;
     final String method = call.method;
 
@@ -384,8 +439,44 @@ class AdPopcornSSP {
         if (rewardPlusCompletedListener != null){
             rewardPlusCompletedListener!(result, resultCode, reward);
         }
-      }
-      else if (method == 'ContentsAdOpenSuccess') {
+      }  else if (method == 'APSSPVideoMixAdLoadSuccess') {
+        final String placementId = arguments['placementId'];
+        if (videoMixAdLoadSuccessListener != null) {
+          videoMixAdLoadSuccessListener!(placementId);
+        }
+      } else if (method == 'APSSPVideoMixAdLoadFail') {
+        final String placementId = arguments['placementId'];
+        final int errorCode = arguments['errorCode'];
+        if (videoMixAdLoadFailListener != null) {
+          videoMixAdLoadFailListener!(placementId, errorCode);
+        }
+      } else if (method == 'APSSPVideoMixAdShowSuccess') {
+        final String placementId = arguments['placementId'];
+        if (videoMixAdShowSuccessListener != null) {
+          videoMixAdShowSuccessListener!(placementId);
+        }
+      } else if (method == 'APSSPVideoMixAdShowFail') {
+        final String placementId = arguments['placementId'];
+        if (videoMixAdShowFailListener != null) {
+          videoMixAdShowFailListener!(placementId);
+        }
+      } else if (method == 'APSSPVideoMixAdClicked') {
+        final String placementId = arguments['placementId'];
+        if (videoMixAdClickedListener != null) {
+          videoMixAdClickedListener!(placementId);
+        }
+      } else if (method == 'APSSPVideoMixAdClosed') {
+        final String placementId = arguments['placementId'];
+        final int campaignType = arguments['campaignType'];
+        if (videoMixAdClosedListener != null) {
+          videoMixAdClosedListener!(placementId, campaignType);
+        }
+      } else if (method == 'APSSPVideoMixAdPlayCompleted') {
+        final String placementId = arguments['placementId'];
+        if (videoMixAdCompletedListener != null){
+          videoMixAdCompletedListener!(placementId);
+        }
+      } else if (method == 'ContentsAdOpenSuccess') {
         if (contentsAdOpenSuccessListener != null) {
             contentsAdOpenSuccessListener!();
         }

@@ -2,7 +2,7 @@
 #import "AdPopcornSSPPlugin.h"
 
 @interface AdPopcornSSPPlugin() <APSSPSDKInitializeDelegate, APSSPInterstitialAdDelegate,
-APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate, APSSPPopContentsAdDelegate, APSSPRewardAdPlusEventDelegate>
+APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDelegate, APSSPRewardPlusSettingDelegate, APSSPPopContentsAdDelegate, APSSPRewardAdPlusEventDelegate, APSSPVideoMixAdDelegate>
 @end
 
 @implementation AdPopcornSSPPlugin
@@ -13,6 +13,7 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
 @synthesize rewardVideoDictionary = _rewardVideoDictionary;
 @synthesize contentsDictionary = _contentsDictionary;
 @synthesize popContentsDictionary = _popContentsDictionary;
+@synthesize videoMixDictionary = _videoMixDictionary;
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
@@ -58,6 +59,11 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
         _popContentsDictionary = [[NSMutableDictionary alloc] init];
     }
     
+    if(_videoMixDictionary == nil)
+    {
+        _videoMixDictionary = [[NSMutableDictionary alloc] init];
+    }
+    
     if([@"init" isEqualToString:call.method])
     {
       [self callInit:call result:result];
@@ -101,6 +107,14 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
     else if([@"showRewardVideo" isEqualToString:call.method])
     {
         [self callShowRewardVideo:call result:result];
+    }
+    else if([@"loadVideoMix" isEqualToString:call.method])
+    {
+        [self callLoadVideoMix:call result:result];
+    }
+    else if([@"showVideoMix" isEqualToString:call.method])
+    {
+        [self callShowVideoMix:call result:result];
     }
     else if([@"openContents" isEqualToString:call.method])
     {
@@ -379,6 +393,61 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
     {
         NSLog(@"callShowRewardVideo placementId : %@", placementId);
         result([FlutterError errorWithCode:@"no_load_ad" message:@"reward video is not loaded" details:nil]);
+        return;
+    }
+}
+
+- (void)callLoadVideoMix:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    NSString* placementId = (NSString*)call.arguments[@"placementId"];
+    if(appKey == nil || appKey.length == 0) {
+        result([FlutterError errorWithCode:@"no_app_key" message:@"a nil or empty AdPopcornSSP appKey was provided" details:nil]);
+        return;
+    }
+    if (placementId == nil || placementId.length == 0) {
+        result([FlutterError errorWithCode:@"no_placement_id" message:@"a nil or empty AdPopcornSSP placementId was provided" details:nil]);
+        return;
+    }
+
+    AdPopcornSSPVideoMixAd *videoMixAd;
+    if([_videoMixDictionary objectForKey:placementId])
+    {
+        NSLog(@"callLoadVideoMix already exist video mix placementId : %@", placementId);
+        videoMixAd = [_videoMixDictionary objectForKey:placementId];
+    }
+    else
+    {
+        NSLog(@"callLoadVideoMix placementId : %@", placementId);
+        videoMixAd = [[AdPopcornSSPVideoMixAd alloc] initWithKey:appKey placementId:placementId viewController:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
+        videoMixAd.placementId = placementId;
+        [_videoMixDictionary setObject:videoMixAd forKey:placementId];
+    }
+    videoMixAd.delegate = self;
+    [videoMixAd loadRequest];
+}
+
+- (void)callShowVideoMix:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString* appKey = (NSString*)call.arguments[@"appKey"];
+    NSString* placementId = (NSString*)call.arguments[@"placementId"];
+    if(appKey == nil || appKey.length == 0) {
+        result([FlutterError errorWithCode:@"no_app_key" message:@"a nil or empty AdPopcornSSP appKey was provided" details:nil]);
+        return;
+    }
+    if (placementId == nil || placementId.length == 0) {
+        result([FlutterError errorWithCode:@"no_placement_id" message:@"a nil or empty AdPopcornSSP placementId was provided" details:nil]);
+        return;
+    }
+    
+    if([_videoMixDictionary objectForKey:placementId])
+    {
+        NSLog(@"callShowVideoMix already exist reward video placementId : %@", placementId);
+        AdPopcornSSPVideoMixAd *videoMixAd = [_videoMixDictionary objectForKey:placementId];
+        [videoMixAd presentFromViewController:[[[[UIApplication sharedApplication] delegate] window] rootViewController]];
+    }
+    else
+    {
+        NSLog(@"callShowVideoMix placementId : %@", placementId);
+        result([FlutterError errorWithCode:@"no_load_ad" message:@"video mix is not loaded" details:nil]);
         return;
     }
 }
@@ -699,6 +768,52 @@ APSSPInterstitialVideoAdDelegate, APSSPRewardVideoAdDelegate, APSSPContentsAdDel
                      arguments:@{@"result":@(result),
                                  @"resultCode":@(resultCode),
                                  @"reward":@(reward)}];
+}
+
+#pragma mark APSSPVideoMixAdDelegate
+- (void)APSSPVideoMixAdLoadSuccess:(AdPopcornSSPVideoMixAd *)VideoMixAd videoMixAdType: (int) type
+{
+    [_channel invokeMethod:@"APSSPVideoMixAdLoadSuccess"
+                     arguments:@{@"placementId":VideoMixAd.placementId != nil ? VideoMixAd.placementId : @""}];
+}
+
+- (void)APSSPVideoMixAdLoadFail:(AdPopcornSSPVideoMixAd *)VideoMixAd error:(AdPopcornSSPError *)error
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPVideoMixAdLoadFail : %@", error);
+    [_channel invokeMethod:@"APSSPVideoMixAdLoadFail"
+                 arguments:@{@"placementId":VideoMixAd.placementId != nil ? VideoMixAd.placementId : @"",
+                             @"errorCode":@(error.code)}];
+}
+
+- (void)APSSPVideoMixAdShowSuccess:(AdPopcornSSPVideoMixAd *)VideoMixAd
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPVideoMixAdShowSuccess");
+    [_channel invokeMethod:@"APSSPVideoMixAdShowSuccess"
+                     arguments:@{@"placementId":VideoMixAd.placementId != nil ? VideoMixAd.placementId : @""}];
+}
+
+- (void)APSSPVideoMixAdShowFail:(AdPopcornSSPVideoMixAd *)VideoMixAd
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPVideoMixAdShowFail");
+    [_channel invokeMethod:@"APSSPVideoMixAdShowFail"
+                     arguments:@{@"placementId":VideoMixAd.placementId != nil ? VideoMixAd.placementId : @""}];
+}
+
+- (void)APSSPVideoMixAdClosed:(AdPopcornSSPVideoMixAd *)VideoMixAd videoMixAdType:(int)type
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPVideoMixAdClosed");
+    [_channel invokeMethod:@"APSSPVideoMixAdClosed"
+                     arguments:@{@"placementId":VideoMixAd.placementId != nil ? VideoMixAd.placementId : @"",
+                                 @"campaignType":@(type)}];
+}
+
+- (void)APSSPVideoMixAdPlayCompleted:(AdPopcornSSPVideoMixAd *)VideoMixAd adNetworkNo:(long) adNetworkNo completed:(BOOL)completed
+{
+    NSLog(@"AdPopcornSSPPlugin APSSPVideoMixAdPlayCompleted");
+    [_channel invokeMethod:@"APSSPVideoMixAdPlayCompleted"
+                     arguments:@{@"placementId":VideoMixAd.placementId != nil ? VideoMixAd.placementId : @"",
+                                 @"adNetworkNo":@(adNetworkNo),
+                                 @"completed":@(completed)}];
 }
 
 #pragma mark APSSPContentsAdDelegate
