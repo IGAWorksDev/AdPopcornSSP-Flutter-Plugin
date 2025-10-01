@@ -1,3 +1,7 @@
+## 1.0.11
+* Android 3.9.1, iOS 2.10.6
+* Add VideoMix api
+
 ## 1.0.10
 * Android 3.8.6, iOS 2.10.5
 * Add RewardAdPlus api
