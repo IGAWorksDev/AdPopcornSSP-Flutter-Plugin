@@ -1,3 +1,6 @@
+## 1.0.12
+* Android 3.9.2, iOS 2.11.0
+
 ## 1.0.11
 * Android 3.9.1, iOS 2.10.6
 * Add VideoMix api
